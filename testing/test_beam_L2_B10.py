@@ -1,5 +1,5 @@
 import pytest
-from beamscheduler.beam_calculator_class import Beam
+from SRC.beam_calculator_class import Beam
 from pytest import approx
 
 

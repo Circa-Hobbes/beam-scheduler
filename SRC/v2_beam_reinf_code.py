@@ -403,7 +403,7 @@ main_title.pack(padx=50, pady=20)
 
 # Put KLD design logo
 image_path = resource_path(
-    "killa-design.jpg"
+    "assets/killa-design.jpg"
 )  # use the resource_path function to get the correct path
 kld_logo = Image.open(image_path)  # Then use this path to open the image
 photo = ImageTk.PhotoImage(kld_logo)
