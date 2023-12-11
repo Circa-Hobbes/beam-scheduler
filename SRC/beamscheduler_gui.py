@@ -1,6 +1,5 @@
 from nicegui import app, ui
 
-
 # Turn on dark mode for the website.
 ui.dark_mode().enable()
 
@@ -80,10 +79,11 @@ async def question_popup():
 def ui_header():
     """This function holds the upper row which carries the title and logos."""
     with ui.grid(columns=3).classes("w-full no-wrap"):
-        with ui.row().classes("pt-4 pb-6 pr-6 pl-10 justify-start items-start"):
-            ui.button(
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            with ui.button(
                 icon="question_mark", on_click=question_popup, color="#075985"
-            ).classes("rounded-full w-16 h-16 ml-4")
+            ).classes("rounded-full w-16 h-16 ml-4"):
+                ui.tooltip("Context").classes("text-lg rounded-full")
         with ui.row().classes(
             "bg-sky-900 pt-6 pb-6 pr-6 pl-6 rounded-full justify-center items-center"
         ):
@@ -91,13 +91,34 @@ def ui_header():
                 "Beam Scheduler v0.1 - Made by Adnan Almulla @ Killa Design"
             ).classes("text-2xl font-bold pr-1")
             ui.image("assets/kld logo outlined.png").classes("w-14 h-14")
-        with ui.row().classes("pt-4 pb-6 pr-10 pl-6 justify-end items-end"):
-            ui.element("i").classes("eva eva-github").classes("text-7xl")
+        with ui.row().classes("pt-7 pb-6 pr-10 pl-6 justify-end items-end"):
+            with ui.link(
+                "",
+                target="https://github.com/Circa-Hobbes/beam-scheduler",
+                new_tab=True,
+            ):
+                ui.element("i").classes("eva eva-github").classes("text-7xl")
+                ui.tooltip("Github").classes("text-lg rounded-full")
 
 
-# Call the start popup function to greet the user with what is required to run the script.
-start_popup()
-
-ui_header()
-
-ui.run()
+# Create main row in the centre of the page which contains the upload and download functionality.
+def main_row(excel_handler, download_callback):
+    """This function holds the main row which carries the upload and download functionality."""
+    with ui.grid(columns=3).classes("w-full no-wrap mt-96"):
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            pass
+        with ui.row().classes("pt-6 pb-6 pr-6 pl-6 justify-start items-start"):
+            ui.upload(
+                label="Please upload the extracted flexure and shear excel spreadsheet:",
+                on_upload=excel_handler,
+                auto_upload=True,
+                on_rejected=lambda: ui.notify(
+                    "Please only upload an excel spreadsheet (.xlsx)", type="warning"
+                ),
+            ).classes("max-w-full text-lg").props('accept=".xlsx"')
+            ui.button(
+                "Please download the completed beam schedule",
+                on_click=download_callback,
+            ).classes("rounded-full bg-sky-900 self-center")
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            pass
