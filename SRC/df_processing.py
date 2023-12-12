@@ -1,10 +1,5 @@
 from beam_calculator_class import Beam
 import pandas as pd
-import os
-from PIL import Image, ImageTk
-import tkinter as tk
-import sys
-from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 
 # Create all instances of Beam class.
@@ -41,32 +36,15 @@ def create_instance(
     return beam
 
 
-# Create function to import ETABS beam design extraction spreadsheet.
-def import_file():
-    root = tk.Tk()
-    root.withdraw()
-    filepath = askopenfilename()
-    root.destroy()
-    return filepath
+def process_dataframes(flexural_df, shear_df):
+    # Remove the first two rows of both dataframes.
+    initial_flexural_df = flexural_df.drop([0, 1])
+    initial_shear_df = shear_df.drop([0, 1])
 
+    # Reset indices in place for easier manipulation.
+    initial_flexural_df = initial_flexural_df.reset_index(drop=True)
+    initial_shear_df = initial_shear_df.reset_index(drop=True)
 
-# Call import_file function and associate spreadsheet to variable.
-excel_file = import_file()
-
-# Initialise first flexural and shear dataframes.
-initial_flexural_df = pd.read_excel(excel_file, sheet_name=0)
-initial_shear_df = pd.read_excel(excel_file, sheet_name=1)
-
-# Remove the first two rows of both dataframes.
-initial_flexural_df = initial_flexural_df.drop([0, 1])
-initial_shear_df = initial_shear_df.drop([0, 1])
-
-# Reset indices in place for easier manipulation.
-initial_flexural_df = initial_flexural_df.reset_index(drop=True)
-initial_shear_df = initial_shear_df.reset_index(drop=True)
-
-# Begin manipulation and cleaning of dataframe
-if __name__ == "__main__":
     # Slice through the flexural df and get the story identifier.
     stories = initial_flexural_df[
         "TABLE:  Concrete Beam Flexure Envelope - ACI 318-19"
@@ -302,120 +280,52 @@ if __name__ == "__main__":
         # Grab the index of the side face reinforcement with the highest area.
         beam.get_index_for_side_face_reinf()
 
-# Create dataframe to fill data with.
-columns = pd.MultiIndex.from_tuples(
-    [
-        ("Storey", ""),
-        ("Etabs ID", ""),
-        ("Dimensions", "Width (mm)"),
-        ("Dimensions", "Depth (mm)"),
-        ("Bottom Reinforcement", "Left (BL)"),
-        ("Bottom Reinforcement", "Middle (B)"),
-        ("Bottom Reinforcement", "Right (BR)"),
-        ("Top Reinforcement", "Left (TL)"),
-        ("Top Reinforcement", "Middle (T)"),
-        ("Top Reinforcement", "Right (TR)"),
-        ("Side Face Reinforcement", ""),
-        ("Shear links", "Left (H)"),
-        ("Shear links", "Middle (J)"),
-        ("Shear links", "Right (K)"),
-    ]
-)
-beam_schedule_df = pd.DataFrame(columns=columns)
+    # Create dataframe to fill data with.
+    columns = pd.MultiIndex.from_tuples(
+        [
+            ("Storey", ""),
+            ("Etabs ID", ""),
+            ("Dimensions", "Width (mm)"),
+            ("Dimensions", "Depth (mm)"),
+            ("Bottom Reinforcement", "Left (BL)"),
+            ("Bottom Reinforcement", "Middle (B)"),
+            ("Bottom Reinforcement", "Right (BR)"),
+            ("Top Reinforcement", "Left (TL)"),
+            ("Top Reinforcement", "Middle (T)"),
+            ("Top Reinforcement", "Right (TR)"),
+            ("Side Face Reinforcement", ""),
+            ("Shear links", "Left (H)"),
+            ("Shear links", "Middle (J)"),
+            ("Shear links", "Right (K)"),
+        ]
+    )
+    beam_schedule_df = pd.DataFrame(columns=columns)
 
-# Map the relevant beam attributes to the beam schedule dataframe columns:
-beam_mapping = {
-    "story": ("Storey", ""),
-    "id": ("Etabs ID", ""),
-    "width": ("Dimensions", "Width (mm)"),
-    "depth": ("Dimensions", "Depth (mm)"),
-    "flex_bot_left_rebar_string": ("Bottom Reinforcement", "Left (BL)"),
-    "flex_bot_middle_rebar_string": ("Bottom Reinforcement", "Middle (B)"),
-    "flex_bot_right_rebar_string": ("Bottom Reinforcement", "Right (BR)"),
-    "flex_top_left_rebar_string": ("Top Reinforcement", "Left (TL)"),
-    "flex_top_middle_rebar_string": ("Top Reinforcement", "Middle (T)"),
-    "flex_top_right_rebar_string": ("Top Reinforcement", "Right (TR)"),
-    "selected_side_face_reinforcement_string": ("Side Face Reinforcement", ""),
-    "shear_left_string": ("Shear links", "Left (H)"),
-    "shear_middle_string": ("Shear links", "Middle (J)"),
-    "shear_right_string": ("Shear links", "Right (K)"),
-}
+    # Map the relevant beam attributes to the beam schedule dataframe columns:
+    beam_mapping = {
+        "story": ("Storey", ""),
+        "id": ("Etabs ID", ""),
+        "width": ("Dimensions", "Width (mm)"),
+        "depth": ("Dimensions", "Depth (mm)"),
+        "flex_bot_left_rebar_string": ("Bottom Reinforcement", "Left (BL)"),
+        "flex_bot_middle_rebar_string": ("Bottom Reinforcement", "Middle (B)"),
+        "flex_bot_right_rebar_string": ("Bottom Reinforcement", "Right (BR)"),
+        "flex_top_left_rebar_string": ("Top Reinforcement", "Left (TL)"),
+        "flex_top_middle_rebar_string": ("Top Reinforcement", "Middle (T)"),
+        "flex_top_right_rebar_string": ("Top Reinforcement", "Right (TR)"),
+        "selected_side_face_reinforcement_string": ("Side Face Reinforcement", ""),
+        "shear_left_string": ("Shear links", "Left (H)"),
+        "shear_middle_string": ("Shear links", "Middle (J)"),
+        "shear_right_string": ("Shear links", "Right (K)"),
+    }
 
-# Loop through all the beam instances and populate the beam schedule dataframe with relevant information.
-for idx, beam in enumerate(beam_instances):  # type: ignore
-    for attr, col in beam_mapping.items():
-        value = getattr(beam, attr)
-        if isinstance(value, str):
-            beam_schedule_df[col] = beam_schedule_df[col].astype(object)
-        beam_schedule_df.loc[idx, col] = value
+    # Loop through all the beam instances and populate the beam schedule dataframe with relevant information.
+    for idx, beam in enumerate(beam_instances):  # type: ignore
+        for attr, col in beam_mapping.items():
+            value = getattr(beam, attr)
+            if isinstance(value, str):
+                beam_schedule_df[col] = beam_schedule_df[col].astype(object)
+            beam_schedule_df.loc[idx, col] = value
 
-
-# Create the relevant functions to export the excel file
-def export_file(beam_schedule_df):
-    # Ask the user for the file path to save the Excel file
-    filepath = asksaveasfilename(defaultextension=".xlsx")  # type: ignore
-
-    # Create an Excel writer object
-    writer = pd.ExcelWriter(filepath, engine="xlsxwriter")
-
-    # Write the entire DataFrame to the first sheet
-    beam_schedule_df.to_excel(writer, sheet_name="Beam Reinforcement Schedule")
-
-    # Group by the 'Storey' column
-    grouped = beam_schedule_df.groupby("Storey", sort=False)
-
-    # Iterate through the groups and write to separate sheets
-    for name, group in grouped:
-        sheet_name = f"{name}"
-        group.to_excel(writer, sheet_name=sheet_name)
-
-    # Save the Excel file
-    writer.close()
-    sys.exit()
-
-
-def resource_path(relative_path):
-    """Get absolute path to resource, works for dev and for PyInstaller"""
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS  # type: ignore
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
-
-# create main program
-gui = tk.Tk()
-
-# create window geometry and title
-gui.geometry("900x350")
-gui.title("Beam Reinforcement Scheduling Program - Made by Adnan @ KLD")
-
-# Create title inside program
-main_title = tk.Label(
-    gui,
-    text="Beam Reinforcement Scheduling Program. Made by Adnan @ KLD",
-    font=("Helvetica", 18),
-)
-main_title.pack(padx=50, pady=20)
-
-# Put KLD design logo
-image_path = resource_path(
-    "assets/killa-design.jpg"
-)  # use the resource_path function to get the correct path
-kld_logo = Image.open(image_path)  # Then use this path to open the image
-photo = ImageTk.PhotoImage(kld_logo)
-label = tk.Label(gui, image=photo)
-label.pack(side="top", fill="both", padx=50)
-
-# Put the button to ask for the name of the completed excel file and to download it
-final_button = tk.Button(
-    gui,
-    text="Please Download the Completed Beam Reinforcement Schedule",
-    font=("Helvetica", 15),
-    command=lambda: export_file(beam_schedule_df),
-)
-final_button.pack(padx=50, pady=10)
-
-# Run the main loop to execute the program.
-gui.mainloop()
+    processed_beam_schedule_df = beam_schedule_df
+    return processed_beam_schedule_df
