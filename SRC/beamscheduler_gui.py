@@ -14,7 +14,7 @@ def start_popup():
     """This function aims to clarify what the beam scheduler does and what it requires
     to run properly."""
     with ui.dialog() as dialog, ui.card().classes("w-fit"):
-        app.on_connect(dialog)
+        app.on_startup(dialog)
         ui.label("Beam Scheduler v0.1").classes("self-center font-bold text-4xl -my-2")
         ui.label("Made by Adnan Almulla @ Killa Design").classes("self-center text-2xl")
         ui.label(
@@ -102,23 +102,32 @@ def ui_header():
 
 
 # Create main row in the centre of the page which contains the upload and download functionality.
-def main_row(excel_handler, download_callback):
+def main_row(upload_handler):
     """This function holds the main row which carries the upload and download functionality."""
     with ui.grid(columns=3).classes("w-full no-wrap mt-96"):
         with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
             pass
-        with ui.row().classes("pt-6 pb-6 pr-6 pl-6 justify-start items-start"):
+        with ui.row().classes("pt-6 pb-6 pr-6 pl-6 justify-center items-center"):
             ui.upload(
                 label="Please upload the extracted flexure and shear excel spreadsheet:",
-                on_upload=excel_handler,
+                on_upload=upload_handler,
                 auto_upload=True,
                 on_rejected=lambda: ui.notify(
                     "Please only upload an excel spreadsheet (.xlsx)", type="warning"
                 ),
-            ).classes("max-w-full text-lg").props('accept=".xlsx"')
+            ).classes("max-w-full text-lg self-center").props('accept=".xlsx"')
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            pass
+
+
+def download_button(download_handler):
+    with ui.grid(columns=3).classes("w-full no-wrap mt-28"):
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            pass
+        with ui.row().classes("pt-6 pb-6 pr-6 pl-6 justify-center items-center"):
             ui.button(
-                "Please download the completed beam schedule",
-                on_click=download_callback,
-            ).classes("rounded-full bg-sky-900 self-center")
+                "Download completed beam schedule",
+                on_click=download_handler,
+            ).classes("max-w-full text-lg self-center rounded-full")
         with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
             pass

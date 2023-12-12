@@ -1,9 +1,12 @@
 from beam_calculator_class import Beam
 import pandas as pd
 import beamscheduler_gui as gui
-from nicegui import ui
+from nicegui import ui, events
+import io
 import tempfile
-import os
+
+# Global variable to store the processed DataFrame
+processed_beam_schedule_df = None
 
 
 # Create all instances of Beam class.
@@ -43,16 +46,20 @@ def create_instance(
 def main():
     gui.start_popup()
     gui.ui_header()
-    gui.main_row(download_callback, excel_handler)
+    gui.main_row(excel_handler)
+    gui.download_button(download_handler)
     ui.run()
 
 
 # Handle and utilise the excel spreadsheet for processing.
-def excel_handler(event):
-    excel_file = event.file
+def excel_handler(e: events.UploadEventArguments):
+    global processed_beam_schedule_df
+    excel_file = e.content
     initial_flexural_df = pd.read_excel(excel_file, sheet_name=0)
     initial_shear_df = pd.read_excel(excel_file, sheet_name=1)
-    process_dataframes(initial_flexural_df, initial_shear_df)
+    processed_beam_schedule_df = process_dataframes(
+        initial_flexural_df, initial_shear_df
+    )
 
 
 def process_dataframes(flexural_df, shear_df):
@@ -345,34 +352,50 @@ def process_dataframes(flexural_df, shear_df):
             if isinstance(value, str):
                 beam_schedule_df[col] = beam_schedule_df[col].astype(object)
             beam_schedule_df.loc[idx, col] = value
+    processed_beam_schedule_df = beam_schedule_df
+    return processed_beam_schedule_df
 
 
 # Create the relevant functions to export the excel file
 def export_file(beam_schedule_df):
-    # Create a temporary file
-    temp_file = tempfile.NamedTemporaryFile(
-        delete=False, suffix=".xlsx", dir=os.path.dirname(__file__)
-    )
-    filepath = temp_file.name
-    temp_file.close()
+    # Use BytesIO as an in-memory buffer
+    output = io.BytesIO()
 
-    # Create an Excel writer object
-    writer = pd.ExcelWriter(filepath, engine="xlsxwriter")
+    # Create an Excel writer object with the BytesIO object
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        # Write the entire DataFrame to the first sheet
+        beam_schedule_df.to_excel(writer, sheet_name="Beam Reinforcement Schedule")
 
-    # Write the entire DataFrame to the first sheet
-    beam_schedule_df.to_excel(writer, sheet_name="Beam Reinforcement Schedule")
+        # Group by the 'Storey' column
+        grouped = beam_schedule_df.groupby("Storey", sort=False)
 
-    # Group by the 'Storey' column
-    grouped = beam_schedule_df.groupby("Storey", sort=False)
+        # Iterate through the groups and write to separate sheets
+        for name, group in grouped:
+            sheet_name = f"{name}"
+            group.to_excel(writer, sheet_name=sheet_name)
 
-    # Iterate through the groups and write to separate sheets
-    for name, group in grouped:
-        sheet_name = f"{name}"
-        group.to_excel(writer, sheet_name=sheet_name)
+    # Return the Excel file content from the in-memory buffer
+    return output.getvalue()
 
-    # Save the Excel file
-    writer.close()
-    return filepath
+
+def download_handler():
+    global processed_beam_schedule_df
+    if processed_beam_schedule_df is not None:
+        # Call export_file to get the in-memory Excel file
+        excel_content = export_file(processed_beam_schedule_df)
+
+        # Write the content to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+            tmp.write(excel_content)
+            tmp_path = tmp.name  # Store the file path
+
+        # Initiate the download using the file path
+        ui.download(tmp_path, "beam_schedule.xlsx")
+    else:
+        ui.notify(
+            "No data available for download or uploaded file does not adhere to considerations. Please try again.",
+            type="negative",
+        )
 
 
 if __name__ in {"__main__", "__mp_main__"}:
