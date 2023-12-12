@@ -104,30 +104,34 @@ def ui_header():
 # Create main row in the centre of the page which contains the upload and download functionality.
 def main_row(upload_handler):
     """This function holds the main row which carries the upload and download functionality."""
-    with ui.grid(columns=3).classes("w-full no-wrap mt-96"):
+    with ui.grid(columns=3).classes("w-full no-wrap mt-64"):
         with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
             pass
-        with ui.row().classes("pt-6 pb-6 pr-6 pl-6 justify-center items-center"):
+        with ui.row().classes("mt-8 ml-4 pt-6 pr-6 pl-6 justify-center"):
+            with ui.card().classes("no-shadow border-[1px] rounded-full bg-sky-900"):
+                ui.label(
+                    "Please upload the extracted flexure and shear excel spreadsheet:"
+                ).classes("text-xl font-bold self-center")
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            pass
+    ###############################################################################################
+    with ui.grid(columns=3).classes("w-full no-wrap"):
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            pass
+        with ui.row().classes("mt-8 pt-6 pb-6 pr-6 pl-6 justify-center items-center"):
             ui.upload(
-                label="Please upload the extracted flexure and shear excel spreadsheet:",
+                label="",
                 on_upload=upload_handler,
                 auto_upload=True,
                 on_rejected=lambda: ui.notify(
                     "Please only upload an excel spreadsheet (.xlsx)", type="warning"
                 ),
-            ).classes("max-w-full text-lg self-center").props('accept=".xlsx"')
+            ).classes("w-96 text-lg self-center").props('accept=".xlsx"')
         with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
             pass
 
 
-def download_button(download_handler):
-    with ui.grid(columns=3).classes("w-full no-wrap mt-28"):
-        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
-            pass
-        with ui.row().classes("pt-6 pb-6 pr-6 pl-6 justify-center items-center"):
-            ui.button(
-                "Download completed beam schedule",
-                on_click=download_handler,
-            ).classes("max-w-full text-lg self-center rounded-full")
-        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
-            pass
+@ui.refreshable
+def download_button():
+    main_container = ui.grid(columns=1).classes("w-full no-wrap")
+    return main_container

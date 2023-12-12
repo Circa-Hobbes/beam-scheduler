@@ -4,6 +4,7 @@ from nicegui import ui, events
 import io
 import tempfile
 import df_processing as pr
+import asyncio
 
 # Global variable to store the processed DataFrame
 processed_beam_schedule_df = None
@@ -12,20 +13,51 @@ processed_beam_schedule_df = None
 def main():
     gui.start_popup()
     gui.ui_header()
-    gui.main_row(excel_handler)
-    gui.download_button(download_handler)
+    gui.main_row(lambda e: excel_handler(e, main_container))
+    main_container = gui.download_button()
     ui.run()
 
 
 # Handle and utilise the excel spreadsheet for processing.
-def excel_handler(e: events.UploadEventArguments):
+def excel_handler(e: events.UploadEventArguments, container):
+    global processed_beam_schedule_df
+    ui.notify(
+        f"{e.name} successfully uploaded! Please await processing.", type="positive"
+    )
+    # Schedule the processing of the content asynchronously
+    asyncio.create_task(process_content(e, container))
+
+
+async def process_content(e: events.UploadEventArguments, container):
     global processed_beam_schedule_df
     excel_file = e.content
     initial_flexural_df = pd.read_excel(excel_file, sheet_name=0)
     initial_shear_df = pd.read_excel(excel_file, sheet_name=1)
-    processed_beam_schedule_df = pr.process_dataframes(
-        initial_flexural_df, initial_shear_df
+    processed_beam_schedule_df = await asyncio.to_thread(
+        pr.process_dataframes, initial_flexural_df, initial_shear_df
     )
+    with container:
+        ui.notify(
+            "Processing complete. Please download the completed beam schedule.",
+            type="positive",
+        )
+        add_down_button()
+
+
+def add_down_button():
+    with ui.grid(columns=3).classes("w-full no-wrap mt-5"):
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            pass
+        with ui.row().classes("pt-6 pb-6 pr-6 pl-6 justify-center items-center"):
+            ui.button(
+                "download beam schedule",
+                on_click=download_handler,
+                color="#075985",
+            ).classes("text-lg font-bold self-center rounded-full").on(
+                "click", lambda: ui.notify("Downloading...")
+            )
+        with ui.row().classes("pt-8 pb-6 pr-6 pl-10 justify-start items-start"):
+            pass
 
 
 # Create the relevant functions to export the excel file
