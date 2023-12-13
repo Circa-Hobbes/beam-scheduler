@@ -52,11 +52,29 @@ async def process_content(e: events.UploadEventArguments, container):
             pr.process_dataframes, initial_flexural_df, initial_shear_df
         )
         with container:
-            ui.notify(
-                "Processing complete. Please download the completed beam schedule.",
-                type="positive",
-            )
-            add_down_button()
+            if isinstance(processed_beam_schedule_df, str):
+                if processed_beam_schedule_df == "Incorrect section definitions":
+                    ui.notify(
+                        "The section definitions as exported in the spreadsheet do not abide with the syntax required. Please update and try again.",
+                        type="negative",
+                    )
+            elif processed_beam_schedule_df is None:
+                ui.notify(
+                    "No data available for download or uploaded file does not adhere to considerations. Please try again.",
+                    type="negative",
+                )
+            elif isinstance(processed_beam_schedule_df, pd.DataFrame):
+                if processed_beam_schedule_df.empty:
+                    ui.notify(
+                        "Processing did not go through and spreadsheet is empty. Please revise and consider context then try again",
+                        type="warning",
+                    )
+                else:
+                    ui.notify(
+                        "Processing complete. Please download the completed beam schedule.",
+                        type="positive",
+                    )
+                    add_down_button()
     else:
         with container:
             ui.notify(
@@ -105,22 +123,16 @@ def export_file(beam_schedule_df):
 
 def download_handler():
     global processed_beam_schedule_df
-    if processed_beam_schedule_df is not None:
-        # Call export_file to get the in-memory Excel file
-        excel_content = export_file(processed_beam_schedule_df)
+    # Call export_file to get the in-memory Excel file
+    excel_content = export_file(processed_beam_schedule_df)
 
-        # Write the content to a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-            tmp.write(excel_content)
-            tmp_path = tmp.name  # Store the file path
+    # Write the content to a temporary file
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+        tmp.write(excel_content)
+        tmp_path = tmp.name  # Store the file path
 
-        # Initiate the download using the file path
-        ui.download(tmp_path, "beam_schedule.xlsx")
-    else:
-        ui.notify(
-            "No data available for download or uploaded file does not adhere to considerations. Please try again.",
-            type="negative",
-        )
+    # Initiate the download using the file path
+    ui.download(tmp_path, "beam_schedule.xlsx")
 
 
 if __name__ in {"__main__", "__mp_main__"}:
