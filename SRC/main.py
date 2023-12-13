@@ -1,6 +1,6 @@
 import pandas as pd
 import beamscheduler_gui as gui
-from nicegui import ui, events
+from nicegui import ui, events, app
 import io
 import tempfile
 import df_processing as pr
@@ -10,6 +10,7 @@ import asyncio
 processed_beam_schedule_df = None
 
 
+@app.route("/")
 def main():
     gui.start_popup()
     gui.ui_header()
