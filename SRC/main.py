@@ -21,27 +21,48 @@ def main():
 # Handle and utilise the excel spreadsheet for processing.
 def excel_handler(e: events.UploadEventArguments, container):
     global processed_beam_schedule_df
-    ui.notify(
-        f"{e.name} successfully uploaded! Please await processing.", type="positive"
-    )
-    # Schedule the processing of the content asynchronously
-    asyncio.create_task(process_content(e, container))
+    xl = pd.ExcelFile(e.content)
+    if len(xl.sheet_names) == 3:
+        ui.notify(
+            f"{e.name} successfully uploaded! Please await processing.", type="positive"
+        )
+        # Schedule the processing of the content asynchronously
+        asyncio.create_task(process_content(e, container))
+    else:
+        ui.notify(
+            f"{e.name} does not contain the correct number of sheets. Are you sure flexure and shear are in the same spreadsheet?",
+            type="warning",
+        )
 
 
 async def process_content(e: events.UploadEventArguments, container):
     global processed_beam_schedule_df
     excel_file = e.content
-    initial_flexural_df = pd.read_excel(excel_file, sheet_name=0)
-    initial_shear_df = pd.read_excel(excel_file, sheet_name=1)
-    processed_beam_schedule_df = await asyncio.to_thread(
-        pr.process_dataframes, initial_flexural_df, initial_shear_df
-    )
-    with container:
-        ui.notify(
-            "Processing complete. Please download the completed beam schedule.",
-            type="positive",
+    checking_flex = pd.read_excel(excel_file, sheet_name=0)
+    checking_shear = pd.read_excel(excel_file, sheet_name=1)
+    if (
+        checking_flex.columns[0]
+        == "TABLE:  Concrete Beam Flexure Envelope - ACI 318-19"
+        and checking_shear.columns[0]
+        == "TABLE:  Concrete Beam Shear Envelope - ACI 318-19"
+    ):
+        initial_flexural_df = pd.read_excel(excel_file, sheet_name=0)
+        initial_shear_df = pd.read_excel(excel_file, sheet_name=1)
+        processed_beam_schedule_df = await asyncio.to_thread(
+            pr.process_dataframes, initial_flexural_df, initial_shear_df
         )
-        add_down_button()
+        with container:
+            ui.notify(
+                "Processing complete. Please download the completed beam schedule.",
+                type="positive",
+            )
+            add_down_button()
+    else:
+        with container:
+            ui.notify(
+                f"{e.name} does not contain the correct sheets. Are you sure flexure and shear are in the this spreadsheet?",
+                type="warning",
+            )
 
 
 def add_down_button():
