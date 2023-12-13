@@ -1,6 +1,6 @@
 import pandas as pd
 import beamscheduler_gui as gui
-from nicegui import ui, events, app
+from nicegui import ui, events
 import io
 import tempfile
 import df_processing as pr
@@ -10,13 +10,12 @@ import asyncio
 processed_beam_schedule_df = None
 
 
-@app.route("/")
 def main():
     gui.start_popup()
     gui.ui_header()
     gui.main_row(lambda e: excel_handler(e, main_container))
     main_container = gui.download_button()
-    ui.run()
+    ui.run(title="Beam Scheduler")
 
 
 # Handle and utilise the excel spreadsheet for processing.
