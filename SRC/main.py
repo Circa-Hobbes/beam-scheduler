@@ -24,7 +24,8 @@ def excel_handler(e: events.UploadEventArguments, container):
     xl = pd.ExcelFile(e.content)
     if len(xl.sheet_names) == 3:
         ui.notify(
-            f"{e.name} successfully uploaded! Please await processing.", type="positive"
+            f"{e.name} successfully uploaded! Please await processing.",
+            type="positive",
         )
         # Schedule the processing of the content asynchronously
         asyncio.create_task(process_content(e, container))
