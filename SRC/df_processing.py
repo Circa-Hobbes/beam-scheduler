@@ -64,13 +64,13 @@ def process_dataframes(flexural_df, shear_df):
 
     if dimension_error_check is False:
         # Take each beam's positive flexural combo and put it in a list within a list.
-        positive_combo_list = initial_flexural_df["Unnamed: 9"].tolist()
+        positive_combo_list = initial_flexural_df["Unnamed: 8"].tolist()
         nested_pos_combo_list = [
             positive_combo_list[i : i + 3]
             for i in range(0, len(positive_combo_list), 3)
         ]
         # Repeat same process as positive flexural combo for negative flexural combo.
-        negative_combo_list = initial_flexural_df["Unnamed: 6"].tolist()
+        negative_combo_list = initial_flexural_df["Unnamed: 5"].tolist()
         nested_neg_combo_list = [
             negative_combo_list[i : i + 3]
             for i in range(0, len(negative_combo_list), 3)
@@ -132,7 +132,7 @@ def process_dataframes(flexural_df, shear_df):
 
         # Take the required flexural torsion reinforcement and put it in a nested list.
         # Index 0 is left, Index 1 is middle, and Index 2 is right.
-        flex_torsion_reinf_needed = initial_shear_df["Unnamed: 13"].tolist()
+        flex_torsion_reinf_needed = initial_shear_df["Unnamed: 14"].tolist()
         flex_torsion_reinf_needed = [
             flex_torsion_reinf_needed[i : i + 3]
             for i in range(0, len(flex_torsion_reinf_needed), 3)
@@ -148,7 +148,7 @@ def process_dataframes(flexural_df, shear_df):
         ]
 
         # Take each beam's shear combo and put it in a nested list.
-        shear_combo_list = initial_shear_df["Unnamed: 6"].tolist()
+        shear_combo_list = initial_shear_df["Unnamed: 5"].tolist()
         nested_shear_combo = [
             shear_combo_list[i : i + 3] for i in range(0, len(shear_combo_list), 3)
         ]
@@ -185,7 +185,7 @@ def process_dataframes(flexural_df, shear_df):
 
         # Take the required shear reinforcement and put it in a nested list.
         # Index 0 is left, Index 1 is middle, and Index 2 is right.
-        shear_reinf_needed = initial_shear_df["Unnamed: 7"].tolist()
+        shear_reinf_needed = initial_shear_df["Unnamed: 8"].tolist()
         shear_reinf_needed = [
             shear_reinf_needed[i : i + 3] for i in range(0, len(shear_reinf_needed), 3)
         ]
@@ -200,7 +200,7 @@ def process_dataframes(flexural_df, shear_df):
         ]
 
         # Repeat the same as required shear reinforcement but for required torsion reinforcement.
-        torsion_reinf_needed = initial_shear_df["Unnamed: 10"].tolist()
+        torsion_reinf_needed = initial_shear_df["Unnamed: 11"].tolist()
         torsion_reinf_needed = [
             torsion_reinf_needed[i : i + 3]
             for i in range(0, len(torsion_reinf_needed), 3)

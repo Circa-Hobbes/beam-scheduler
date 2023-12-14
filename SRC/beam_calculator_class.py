@@ -853,8 +853,8 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             ]
 
     def get_min_shear_long_spacing(self):
-        """This method follows Clause 18.4.2.4 of ACI 318-19 by ensuring that the longitudinally spacing of shear links is
-        not exceeded. This value is inputted into the space list found in shear string and area methods.
+        """This method follows Clause 18.4.2.4 of ACI 318-19 by ensuring that the longitudinal spacing of shear links is
+        not exceeded. This value is inputted into the spacing list found in shear string and area methods.
         This method has been updated to follow Table 9.7.6.2.2, which grabs the minimum middle shear longitudinal spacing.
         """
         combined_long_dia_list = [
