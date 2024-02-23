@@ -15,7 +15,7 @@ def main():
     gui.ui_header()
     gui.main_row(lambda e: excel_handler(e, main_container))
     main_container = gui.download_button()
-    ui.run(title="Beam Scheduler")
+    ui.run(reload=False, title="Beam Scheduler", native=True)
 
 
 # Handle and utilise the excel spreadsheet for processing.
