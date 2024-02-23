@@ -90,7 +90,6 @@ def ui_header():
             ui.label(
                 "Beam Scheduler v0.1 - Made by Adnan Almulla @ Killa Design"
             ).classes("text-2xl font-bold pr-1")
-            ui.image("assets/kld logo outlined.png").classes("w-14 h-14")
         with ui.row().classes("pt-7 pb-6 pr-10 pl-6 justify-end items-end"):
             with ui.link(
                 "",
