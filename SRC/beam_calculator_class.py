@@ -97,6 +97,9 @@ class Beam:
         self.side_face_right_area = None
         self.selected_side_face_reinforcement_string = None
         self.selected_side_face_reinforcement_area = None
+        self.req_bot_left_flex_reinf = 0
+        self.req_bot_middle_flex_reinf = 0
+        self.req_bot_right_flex_reinf = 0
 
     def __str__(self):
         """Create a string describing the attributes of each instantiated beam.
@@ -253,6 +256,26 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             ]
             self.req_flex_torsion_reinf = [0, 0, 0]
 
+        (
+            self.req_bot_left_flex_reinf,
+            self.req_bot_middle_flex_reinf,
+            self.req_bot_right_flex_reinf,
+        ) = (
+            self.req_bot_flex_reinf[0],
+            self.req_bot_flex_reinf[1],
+            self.req_bot_flex_reinf[2],
+        )
+
+        (
+            self.req_top_left_flex_reinf,
+            self.req_top_middle_flex_reinf,
+            self.req_top_right_flex_reinf,
+        ) = (
+            self.req_top_flex_reinf[0],
+            self.req_top_flex_reinf[1],
+            self.req_top_flex_reinf[2],
+        )
+
     def get_top_flex_rebar_string(self):
         """This method loops through the required top flexural reinforcement and provides a string
         containing the schedule for each part of the beam. Once the string has been made, the schedule
@@ -285,9 +308,9 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                                 + (Beam.provided_reinforcement(dia_2))  # type: ignore
                                 * self.flex_rebar_count
                             ) > req:
-                                target[
-                                    index
-                                ] = f"{self.flex_rebar_count}T{dia_1} + {self.flex_rebar_count}T{dia_2}"
+                                target[index] = (
+                                    f"{self.flex_rebar_count}T{dia_1} + {self.flex_rebar_count}T{dia_2}"
+                                )
                                 found = True
                                 # Assign the computed diameters to the appropriate attributes immediately after determining them
                                 if index == 0:
@@ -389,9 +412,9 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                                 * self.flex_rebar_count
                                 > req
                             ):
-                                target[
-                                    index
-                                ] = f"{self.flex_rebar_count}T{dia_1} + {self.flex_rebar_count}T{dia_2}"
+                                target[index] = (
+                                    f"{self.flex_rebar_count}T{dia_1} + {self.flex_rebar_count}T{dia_2}"
+                                )
                                 found = True
                                 # Assign the computed diameter to appropriate attributes after determining them
                                 if index == 0:

@@ -312,6 +312,54 @@ def process_dataframes(flexural_df, shear_df):
                 ("Shear links", "Left (H)"),
                 ("Shear links", "Middle (J)"),
                 ("Shear links", "Right (K)"),
+                (
+                    "Flexural Bottom Left Reinforcement Criteria",
+                    "Required (mm^2)",
+                ),
+                (
+                    "Flexural Bottom Left Reinforcement Criteria",
+                    "Provided (mm^2)",
+                ),
+                (
+                    "Flexural Bottom Middle Reinforcement Criteria",
+                    "Required (mm^2)",
+                ),
+                (
+                    "Flexural Bottom Middle Reinforcement Criteria",
+                    "Provided (mm^2)",
+                ),
+                (
+                    "Flexural Bottom Right Reinforcement Criteria",
+                    "Required (mm^2)",
+                ),
+                (
+                    "Flexural Bottom Right Reinforcement Criteria",
+                    "Provided (mm^2)",
+                ),
+                (
+                    "Flexural Top Left Reinforcement Criteria",
+                    "Required (mm^2)",
+                ),
+                (
+                    "Flexural Top Left Reinforcement Criteria",
+                    "Provided (mm^2)",
+                ),
+                (
+                    "Flexural Top Middle Reinforcement Criteria",
+                    "Required (mm^2)",
+                ),
+                (
+                    "Flexural Top Middle Reinforcement Criteria",
+                    "Provided (mm^2)",
+                ),
+                (
+                    "Flexural Top Right Reinforcement Criteria",
+                    "Required (mm^2)",
+                ),
+                (
+                    "Flexural Top Right Reinforcement Criteria",
+                    "Provided (mm^2)",
+                ),
             ]
         )
         beam_schedule_df = pd.DataFrame(columns=columns)
@@ -332,6 +380,54 @@ def process_dataframes(flexural_df, shear_df):
             "shear_left_string": ("Shear links", "Left (H)"),
             "shear_middle_string": ("Shear links", "Middle (J)"),
             "shear_right_string": ("Shear links", "Right (K)"),
+            "req_bot_left_flex_reinf": (
+                "Flexural Bottom Left Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "flex_bot_left_rebar_area": (
+                "Flexural Bottom Left Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
+            "req_bot_middle_flex_reinf": (
+                "Flexural Bottom Middle Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "flex_bot_middle_rebar_area": (
+                "Flexural Bottom Middle Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
+            "req_bot_right_flex_reinf": (
+                "Flexural Bottom Right Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "flex_bot_right_rebar_area": (
+                "Flexural Bottom Right Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
+            "req_top_left_flex_reinf": (
+                "Flexural Top Left Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "flex_top_left_rebar_area": (
+                "Flexural Top Left Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
+            "req_top_middle_flex_reinf": (
+                "Flexural Top Middle Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "flex_top_middle_rebar_area": (
+                "Flexural Top Middle Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
+            "req_top_right_flex_reinf": (
+                "Flexural Top Right Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "flex_top_right_rebar_area": (
+                "Flexural Top Right Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
         }
 
         # Loop through all the beam instances and populate the beam schedule dataframe with relevant information.
