@@ -360,6 +360,12 @@ def process_dataframes(flexural_df, shear_df):
                     "Flexural Top Right Reinforcement Criteria",
                     "Provided (mm^2)",
                 ),
+                ("Shear Left Reinforcement Criteria", "Required (mm^2)"),
+                ("Shear Left Reinforcement Criteria", "Provided (mm^2)"),
+                ("Shear Middle Reinforcement Criteria", "Required (mm^2)"),
+                ("Shear Middle Reinforcement Criteria", "Provided (mm^2)"),
+                ("Shear Right Reinforcement Criteria", "Required (mm^2)"),
+                ("Shear Right Reinforcement Criteria", "Provided (mm^2)"),
             ]
         )
         beam_schedule_df = pd.DataFrame(columns=columns)
@@ -426,6 +432,30 @@ def process_dataframes(flexural_df, shear_df):
             ),
             "flex_top_right_rebar_area": (
                 "Flexural Top Right Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
+            "req_total_left_shear_reinf": (
+                "Shear Left Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "shear_left_area": (
+                "Shear Left Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
+            "req_total_middle_shear_reinf": (
+                "Shear Middle Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "shear_middle_area": (
+                "Shear Middle Reinforcement Criteria",
+                "Provided (mm^2)",
+            ),
+            "req_total_right_shear_reinf": (
+                "Shear Right Reinforcement Criteria",
+                "Required (mm^2)",
+            ),
+            "shear_right_area": (
+                "Shear Right Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
         }
