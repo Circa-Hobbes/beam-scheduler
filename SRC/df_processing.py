@@ -8,11 +8,13 @@ def create_instance(
     id,
     width,
     depth,
+    comp_conc_grade,
     pos_flex_combo,
     neg_flex_combo,
     req_top_flex_reinf,
     req_bot_flex_reinf,
     req_flex_torsion_reinf,
+    shear_force,
     shear_combo,
     torsion_combo,
     req_shear_reinf,
@@ -23,11 +25,13 @@ def create_instance(
         id,
         width,
         depth,
+        comp_conc_grade,
         pos_flex_combo,
         neg_flex_combo,
         req_top_flex_reinf,
         req_bot_flex_reinf,
         req_flex_torsion_reinf,
+        shear_force,
         shear_combo,
         torsion_combo,
         req_shear_reinf,
@@ -58,6 +62,9 @@ def process_dataframes(flexural_df, shear_df):
     try:
         beam_widths = initial_flexural_df["Unnamed: 3"].iloc[::3].apply(Beam.get_width)
         beam_depths = initial_flexural_df["Unnamed: 3"].iloc[::3].apply(Beam.get_depth)
+        concrete_grade = (
+            initial_flexural_df["Unnamed: 3"].iloc[::3].apply(Beam.get_comp_conc_grade)
+        )
     except ValueError:
         # True means there is an error, false means no error.
         dimension_error_check = True
@@ -147,6 +154,12 @@ def process_dataframes(flexural_df, shear_df):
             for sublist in flex_torsion_reinf_needed
         ]
 
+        # Take each beams shear force (kN) and put it in a nested list.
+        shear_force_list = initial_shear_df["Unnamed: 6"].tolist()
+        nested_shear_force = [
+            shear_force_list[i : i + 3] for i in range(0, len(shear_force_list), 3)
+        ]
+
         # Take each beam's shear combo and put it in a nested list.
         shear_combo_list = initial_shear_df["Unnamed: 5"].tolist()
         nested_shear_combo = [
@@ -220,26 +233,30 @@ def process_dataframes(flexural_df, shear_df):
                 e_id,
                 width,
                 depth,
+                concrete_grade,
                 pos_flex_combo,
                 neg_flex_combo,
                 req_top_flex_reinf,
                 req_bot_flex_reinf,
                 req_flex_torsion_reinf,
+                shear_force,
                 shear_combo,
                 torsion_combo,
                 req_shear_reinf,
                 req_torsion_reinf,
             )
-            for stories, e_id, width, depth, pos_flex_combo, neg_flex_combo, req_top_flex_reinf, req_bot_flex_reinf, req_flex_torsion_reinf, shear_combo, torsion_combo, req_shear_reinf, req_torsion_reinf in zip(
+            for stories, e_id, width, depth, concrete_grade, pos_flex_combo, neg_flex_combo, req_top_flex_reinf, req_bot_flex_reinf, req_flex_torsion_reinf, shear_force, shear_combo, torsion_combo, req_shear_reinf, req_torsion_reinf in zip(
                 stories,
                 e_ids,
                 beam_widths,
                 beam_depths,
+                concrete_grade,
                 positive_flex_combo,
                 negative_flex_combo,
                 top_flex_reinf_needed,
                 bot_flex_reinf_needed,
                 flex_torsion_reinf_needed,
+                nested_shear_force,
                 shear_combo_check,
                 torsion_combo_check,
                 shear_reinf_needed,
@@ -270,6 +287,9 @@ def process_dataframes(flexural_df, shear_df):
 
             # Calculate the required shear legs based on the beams width.
             beam.get_shear_legs()
+
+            # Assess if the transverse shear spacing needs to be checked.
+            beam.check_transverse_shear_spacing()
 
             # Calculate the total required shear reinforcement including shear and torsion.
             beam.get_total_shear_req()
@@ -312,6 +332,7 @@ def process_dataframes(flexural_df, shear_df):
                 ("Shear links", "Left (H)"),
                 ("Shear links", "Middle (J)"),
                 ("Shear links", "Right (K)"),
+                ("Check Transverse Shear Spacing?", ""),
                 (
                     "Flexural Bottom Left Reinforcement Criteria",
                     "Required (mm^2)",
@@ -386,6 +407,7 @@ def process_dataframes(flexural_df, shear_df):
             "shear_left_string": ("Shear links", "Left (H)"),
             "shear_middle_string": ("Shear links", "Middle (J)"),
             "shear_right_string": ("Shear links", "Right (K)"),
+            "transverse_space_check": ("Check Transverse Shear Spacing?", ""),
             "req_bot_left_flex_reinf": (
                 "Flexural Bottom Left Reinforcement Criteria",
                 "Required (mm^2)",

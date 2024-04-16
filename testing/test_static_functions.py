@@ -48,6 +48,28 @@ def test_get_depth(depth: str, expected: int) -> int:
 
 
 @pytest.mark.parametrize(
+    "section, expected",
+    [
+        ("B600X600-C45/56", 45),
+        ("B600X6-C50/56", 50),
+        ("B600X60-C55/56", 55),
+        ("B600X6000-C60/56", 60),
+    ],
+)
+def test_get_conc_grade(section: str, expected: int) -> int:
+    """This function tests the get comp_conc_grade method from the Beam class.
+
+    Args:
+        section (str): The section defintion.
+        expected (int): The cylinderical concrete grade.
+
+    Returns:
+        int: The cylinderical concrete grade.
+    """
+    assert Beam.get_comp_conc_grade(section) == expected
+
+
+@pytest.mark.parametrize(
     "diameter, expected",
     [
         (12, approx(113.1, 0.001)),

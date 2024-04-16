@@ -12,11 +12,13 @@ class Beam:
         id,
         width,
         depth,
+        comp_conc_grade,
         pos_flex_combo,
         neg_flex_combo,
         req_top_flex_reinf,
         req_bot_flex_reinf,
         req_flex_torsion_reinf,
+        shear_force,
         shear_combo,
         torsion_combo,
         req_shear_reinf,
@@ -29,12 +31,14 @@ class Beam:
         self.id = id
         self.width = width
         self.depth = depth
+        self.comp_conc_grade = comp_conc_grade
         self.eff_depth = 0
         self.pos_flex_combo = pos_flex_combo
         self.neg_flex_combo = neg_flex_combo
         self.req_top_flex_reinf = req_top_flex_reinf
         self.req_bot_flex_reinf = req_bot_flex_reinf
         self.req_flex_torsion_reinf = req_flex_torsion_reinf
+        self.shear_force = shear_force
         self.shear_combo = shear_combo
         self.torsion_combo = torsion_combo
         self.req_shear_reinf = req_shear_reinf
@@ -100,6 +104,7 @@ class Beam:
         self.req_bot_left_flex_reinf = 0
         self.req_bot_middle_flex_reinf = 0
         self.req_bot_right_flex_reinf = 0
+        self.transverse_space_check = None
 
     def __str__(self):
         """Create a string describing the attributes of each instantiated beam.
@@ -195,6 +200,26 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         v2_depth_list = v1_depth_list[1 + index_list : -4]
         true_depth = "".join(v2_depth_list)
         return int(true_depth)
+
+    @staticmethod
+    def get_comp_conc_grade(comp_conc_grade: str) -> int:
+        """This function cleans and retrieves the cylinderical concrete compressive strength, fc'.
+
+        Args:
+            comp_conc_grade (str): the section string to clean and get the compressive strength of the beam from.
+
+        Returns:
+            int: the cylincderial concrete compressive strength, fc'.
+        """
+        section_list = list(comp_conc_grade)
+        section_list = [el.lower() for el in section_list]
+        excluded_values = ["p", "t", "b", "-", "_", "x", "s", "w"]
+        excluded_section_list = [ex for ex in section_list if ex not in excluded_values]
+        index_c = excluded_section_list.index("c")
+        index_slash = excluded_section_list.index("/")
+        retrieved_value = excluded_section_list[1 + index_c : index_slash]
+        conc_grade = "".join(retrieved_value)
+        return int(conc_grade)
 
     @staticmethod
     def check_combo(combo_list: list) -> str:
@@ -553,7 +578,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
 
     def get_shear_legs(self):
         """This method calculates the required shear legs based on the width of the instanced beams.
-        It is currently crude and needs updating to be in line with ACI 318-19. Not be more than eff.d/2
+        It is currently crude and needs updating to be in line with ACI 318-19. It checks
         """
         if self.width < 400:
             self.req_shear_legs = 2
@@ -1047,3 +1072,28 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                         self.shear_middle_string = f"{self.req_shear_legs}L-T{dia}@{self.min_shear_centre_long_spacing}"
                         self.shear_middle_dia = dia
                         found = True
+
+    def check_transverse_shear_spacing(self):
+        """This method assesses if the required Vs is greater or less than the nominal concrete shear capacity.
+        as per Table 9.7.6.2.2 of ACI 318.19. If this is the case, the method returns a 'Yes', and if it isn't
+        it returns a 'No'.
+        """
+
+        # Get the maximum shear force from a list of the left, middle, and right section of the beam.
+        maximum_shear_force = max(self.shear_force)
+
+        # The maximum shear force is being subtracted by the concrete shear force capacity as found in Table 22.5.5.1 eq (a) of ACI 318-19
+        concrete_shear_capacity = (
+            0.17 * np.sqrt(self.comp_conc_grade) * self.width * self.eff_depth * 10**-3
+        )
+        required_vs = maximum_shear_force - concrete_shear_capacity
+
+        # The nominal shear capacity equation is obtained from Table 9.7.6.2.2 of ACI 318-19.
+        nominal_shear_capacity = (
+            0.33 * np.sqrt(self.comp_conc_grade) * self.width * self.eff_depth * 10**-3
+        )
+
+        if nominal_shear_capacity >= required_vs:
+            self.transverse_space_check = "No"
+        else:
+            self.transverse_space_check = "Yes"
