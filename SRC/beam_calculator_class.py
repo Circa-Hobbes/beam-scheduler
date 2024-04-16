@@ -240,13 +240,13 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         return self.flex_rebar_count
 
     def flex_torsion_splitting(self):
-        """This method assess the depth of the beam. If the depth is > 600mm, it exits the method.
-        If it's <=600mm, it takes the torsion flexural requirement list, splits each index into two,
+        """This method assess the depth of the beam. If the depth is > 700mm, it exits the method.
+        If it's <=700mm, it takes the torsion flexural requirement list, splits each index into two,
         and then distributes it amongst the top and bottom longitudinal reinforcement. It modifies
         the attributes in place and changes the flex_torsion reinforcement to a list of 0's.
         Check if we need to check against the flexural torsion combo
         """
-        if self.depth <= 600:
+        if self.depth <= 700:
             divided_torsion_list = [i / 2 for i in self.req_flex_torsion_reinf]
             self.req_top_flex_reinf = [
                 a + b for a, b in zip(divided_torsion_list, self.req_top_flex_reinf)
@@ -300,8 +300,8 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                             self.flex_top_right_dia = dia_1
                         break
                 if not found:
-                    for dia_1 in dia_list:
-                        for dia_2 in dia_list:
+                    for dia_2 in dia_list:
+                        for dia_1 in dia_list:
                             if (
                                 (Beam.provided_reinforcement(dia_1))  # type: ignore
                                 * self.flex_rebar_count
@@ -351,8 +351,8 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                         found = True
                         break
                 if not found:
-                    for dia_1 in dia_list:
-                        for dia_2 in dia_list:
+                    for dia_2 in dia_list:
+                        for dia_1 in dia_list:
                             if (
                                 Beam.provided_reinforcement(dia_1)  # type: ignore
                                 * self.flex_rebar_count
@@ -403,8 +403,8 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                             self.flex_bot_right_dia = dia_1
                         break
                 if not found:
-                    for dia_1 in dia_list:
-                        for dia_2 in dia_list:
+                    for dia_2 in dia_list:
+                        for dia_1 in dia_list:
                             if (
                                 Beam.provided_reinforcement(dia_1)  # type: ignore
                                 * self.flex_rebar_count
@@ -455,8 +455,8 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                         found = True
                         break
                 if not found:
-                    for dia_1 in dia_list:
-                        for dia_2 in dia_list:
+                    for dia_2 in dia_list:
+                        for dia_1 in dia_list:
                             if (
                                 Beam.provided_reinforcement(dia_1)  # type: ignore
                                 * self.flex_rebar_count
@@ -553,7 +553,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
 
     def get_shear_legs(self):
         """This method calculates the required shear legs based on the width of the instanced beams.
-        It is currently crude and needs updating to be in line with ACI 318-19.
+        It is currently crude and needs updating to be in line with ACI 318-19. Not be more than eff.d/2
         """
         if self.width < 400:
             self.req_shear_legs = 2
@@ -669,7 +669,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             self.shear_middle_dia,
             self.shear_right_dia,
         ]
-        if self.depth > 600:
+        if self.depth > 700:
             if (
                 self.neg_flex_combo == "False"
                 and self.pos_flex_combo == "False"
@@ -697,7 +697,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
 
     def get_side_face_string(self):
         """This method calculates the side face reinforcement string for beam instances with a depth greater
-        than 600mm. It subtracts the required torsion from the residual calculated from the flexural reinforcement.
+        than 700mm. It subtracts the required torsion from the residual calculated from the flexural reinforcement.
         It also checks if the combos are overstressed or not. It also provides the minimum side face reinforcement
         if the depth is greater than 900 and the flexural torsion requirement is 0."""
         spacing_list = [250, 200, 150]
@@ -717,7 +717,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                 and self.shear_combo == "False"
                 and self.torsion_combo == "False"
             ):
-                if self.depth > 600:
+                if self.depth > 700:
                     for index, req in enumerate(target_torsion):
                         found = False
                         for dia in dia_list:
@@ -745,7 +745,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
 
     def get_side_face_area(self):
         """This method calculates the side face reinforcement area for beam instances with a depth greater
-        than 600mm. It subtracts the required torsion from the residual calculated from the flexural reinforcement.
+        than 700mm. It subtracts the required torsion from the residual calculated from the flexural reinforcement.
         It also checks if the combos are overstressed or not. It also provides the minimum side face reinforcement
         if the depth is greater than 900 and the flexural torsion requirement is 0."""
         spacing_list = [250, 200, 150]
@@ -765,7 +765,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                 and self.shear_combo == "False"
                 and self.torsion_combo == "False"
             ):
-                if self.depth > 600:
+                if self.depth > 700:
                     for index, req in enumerate(target_torsion):
                         found = False
                         for dia in dia_list:
