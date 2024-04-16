@@ -15,7 +15,7 @@ def start_popup():
     to run properly."""
     with ui.dialog() as dialog, ui.card().classes("w-fit"):
         app.on_startup(dialog)
-        ui.label("Beam Scheduler v0.1").classes("self-center font-bold text-4xl -my-2")
+        ui.label("Beam Scheduler v1.0").classes("self-center font-bold text-4xl -my-2")
         ui.label("Made by Adnan Almulla @ Killa Design").classes("self-center text-2xl")
         ui.label(
             "To utilise this script appropriately, please consider and abide by the following:"
@@ -37,6 +37,9 @@ def start_popup():
                 "5. The engineer must account for the fact that shear design first prioritises an increase of spacing down to 100mm, then proceeds to increase the rebar diameter."
             )
             ui.label("6. This script adheres to ACI 318-19 for beam design.")
+            ui.label(
+                "7. Do not filter or alter the exported design results from ETABS. Leave it as it was obtained, as filtering or shifting columns / rows will cause incorrect results."
+            )
         ui.button("Understood", on_click=dialog.close).classes(
             "self-center text-lg mt-4"
         )
@@ -47,7 +50,7 @@ async def question_popup():
     """This function mimics start-popup, except it does not come up on start and only comes up when the question
     button is clicked"""
     with ui.dialog() as dialog, ui.card().classes("w-fit"):
-        ui.label("Beam Scheduler v0.1").classes("self-center font-bold text-4xl -my-2")
+        ui.label("Beam Scheduler v1.0").classes("self-center font-bold text-4xl -my-2")
         ui.label("Made by Adnan Almulla @ Killa Design").classes("self-center text-2xl")
         ui.label(
             "To utilise this script appropriately, please consider and abide by the following:"
@@ -69,6 +72,9 @@ async def question_popup():
                 "5. The engineer must account for the fact that shear design first prioritises an increase of spacing down to 100mm, then proceeds to increase the rebar diameter."
             )
             ui.label("6. This script adheres to ACI 318-19 for beam design.")
+            ui.label(
+                "7. Do not filter or alter the exported design results from ETABS. Leave it as it was obtained, as filtering or shifting columns / rows will cause incorrect results."
+            )
         ui.button("Understood", on_click=dialog.close).classes(
             "self-center text-lg mt-4"
         )
@@ -88,7 +94,7 @@ def ui_header():
             "bg-sky-900 pt-6 pb-6 pr-6 pl-6 rounded-full justify-center items-center"
         ):
             ui.label(
-                "Beam Scheduler v0.1 - Made by Adnan Almulla @ Killa Design"
+                "Beam Scheduler v1.0 - Made by Adnan Almulla @ Killa Design"
             ).classes("text-2xl font-bold pr-1")
         with ui.row().classes("pt-7 pb-6 pr-10 pl-6 justify-end items-end"):
             with ui.link(
