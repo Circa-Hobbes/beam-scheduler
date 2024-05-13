@@ -578,7 +578,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
 
     def get_shear_legs(self):
         """This method calculates the required shear legs based on the width of the instanced beams.
-        It is currently crude and needs updating to be in line with ACI 318-19. It checks
+        It is currently crude and needs updating to be in line with ACI 318-19.
         """
         if self.width < 400:
             self.req_shear_legs = 2
