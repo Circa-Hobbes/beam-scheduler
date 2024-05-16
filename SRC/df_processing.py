@@ -295,15 +295,12 @@ def process_dataframes(flexural_df, shear_df):
             beam.get_total_shear_req()
 
             # Calculate the provided shear reinforcement string and area.
+            beam.get_min_shear_long_spacing()
             beam.get_shear_string()
             beam.get_shear_area()
 
             # Check and replace if necessary the maximum longitudinal shear spacing against Clause 18.4.2.4 of ACI 318-19.
-            beam.get_min_shear_long_spacing()
             beam.modify_shear_reinf()
-
-            # Grab the index of the shear reinforcement with the highest area.
-            # beam.get_index_for_shear_reinf()
 
             # Calculate the allowable side face clear space in beams which have a depth greater than 600mm.
             beam.get_side_face_clear_space()
@@ -334,59 +331,59 @@ def process_dataframes(flexural_df, shear_df):
                 ("Shear links", "Right (K)"),
                 ("Check Transverse Shear Spacing?", ""),
                 (
-                    "Flexural Bottom Left Reinforcement Criteria",
+                    "Flexural BL Reinforcement Criteria",
                     "Required (mm^2)",
                 ),
                 (
-                    "Flexural Bottom Left Reinforcement Criteria",
+                    "Flexural BL Reinforcement Criteria",
                     "Provided (mm^2)",
                 ),
                 (
-                    "Flexural Bottom Middle Reinforcement Criteria",
+                    "Flexural BM Reinforcement Criteria",
                     "Required (mm^2)",
                 ),
                 (
-                    "Flexural Bottom Middle Reinforcement Criteria",
+                    "Flexural BM Reinforcement Criteria",
                     "Provided (mm^2)",
                 ),
                 (
-                    "Flexural Bottom Right Reinforcement Criteria",
+                    "Flexural BR Reinforcement Criteria",
                     "Required (mm^2)",
                 ),
                 (
-                    "Flexural Bottom Right Reinforcement Criteria",
+                    "Flexural BR Reinforcement Criteria",
                     "Provided (mm^2)",
                 ),
                 (
-                    "Flexural Top Left Reinforcement Criteria",
+                    "Flexural TL Reinforcement Criteria",
                     "Required (mm^2)",
                 ),
                 (
-                    "Flexural Top Left Reinforcement Criteria",
+                    "Flexural TL Reinforcement Criteria",
                     "Provided (mm^2)",
                 ),
                 (
-                    "Flexural Top Middle Reinforcement Criteria",
+                    "Flexural TM Reinforcement Criteria",
                     "Required (mm^2)",
                 ),
                 (
-                    "Flexural Top Middle Reinforcement Criteria",
+                    "Flexural TM Reinforcement Criteria",
                     "Provided (mm^2)",
                 ),
                 (
-                    "Flexural Top Right Reinforcement Criteria",
+                    "Flexural TR Reinforcement Criteria",
                     "Required (mm^2)",
                 ),
                 (
-                    "Flexural Top Right Reinforcement Criteria",
+                    "Flexural TR Reinforcement Criteria",
                     "Provided (mm^2)",
                 ),
-                ("Shear Left Reinforcement Criteria", "Required (mm^2)"),
-                ("Shear Left Reinforcement Criteria", "Provided (mm^2)"),
-                ("Shear Middle Reinforcement Criteria", "Required (mm^2)"),
-                ("Shear Middle Reinforcement Criteria", "Provided (mm^2)"),
-                ("Shear Right Reinforcement Criteria", "Required (mm^2)"),
-                ("Shear Right Reinforcement Criteria", "Provided (mm^2)"),
+                ("Shear L Reinforcement Criteria", "Required (mm^2)"),
+                ("Shear L Reinforcement Criteria", "Provided (mm^2)"),
+                ("Shear M Reinforcement Criteria", "Required (mm^2)"),
+                ("Shear M Reinforcement Criteria", "Provided (mm^2)"),
+                ("Shear R Reinforcement Criteria", "Required (mm^2)"),
+                ("Shear R Reinforcement Criteria", "Provided (mm^2)"),
             ]
         )
         beam_schedule_df = pd.DataFrame(columns=columns)
@@ -409,75 +406,75 @@ def process_dataframes(flexural_df, shear_df):
             "shear_right_string": ("Shear links", "Right (K)"),
             "transverse_space_check": ("Check Transverse Shear Spacing?", ""),
             "req_bot_left_flex_reinf": (
-                "Flexural Bottom Left Reinforcement Criteria",
+                "Flexural BL Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "flex_bot_left_rebar_area": (
-                "Flexural Bottom Left Reinforcement Criteria",
+                "Flexural BL Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
             "req_bot_middle_flex_reinf": (
-                "Flexural Bottom Middle Reinforcement Criteria",
+                "Flexural BM Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "flex_bot_middle_rebar_area": (
-                "Flexural Bottom Middle Reinforcement Criteria",
+                "Flexural BM Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
             "req_bot_right_flex_reinf": (
-                "Flexural Bottom Right Reinforcement Criteria",
+                "Flexural BR Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "flex_bot_right_rebar_area": (
-                "Flexural Bottom Right Reinforcement Criteria",
+                "Flexural BR Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
             "req_top_left_flex_reinf": (
-                "Flexural Top Left Reinforcement Criteria",
+                "Flexural TL Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "flex_top_left_rebar_area": (
-                "Flexural Top Left Reinforcement Criteria",
+                "Flexural TL Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
             "req_top_middle_flex_reinf": (
-                "Flexural Top Middle Reinforcement Criteria",
+                "Flexural TM Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "flex_top_middle_rebar_area": (
-                "Flexural Top Middle Reinforcement Criteria",
+                "Flexural TM Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
             "req_top_right_flex_reinf": (
-                "Flexural Top Right Reinforcement Criteria",
+                "Flexural TR Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "flex_top_right_rebar_area": (
-                "Flexural Top Right Reinforcement Criteria",
+                "Flexural TR Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
             "req_total_left_shear_reinf": (
-                "Shear Left Reinforcement Criteria",
+                "Shear L Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "shear_left_area": (
-                "Shear Left Reinforcement Criteria",
+                "Shear L Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
             "req_total_middle_shear_reinf": (
-                "Shear Middle Reinforcement Criteria",
+                "Shear M Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "shear_middle_area": (
-                "Shear Middle Reinforcement Criteria",
+                "Shear M Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
             "req_total_right_shear_reinf": (
-                "Shear Right Reinforcement Criteria",
+                "Shear R Reinforcement Criteria",
                 "Required (mm^2)",
             ),
             "shear_right_area": (
-                "Shear Right Reinforcement Criteria",
+                "Shear R Reinforcement Criteria",
                 "Provided (mm^2)",
             ),
         }

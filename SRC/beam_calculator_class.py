@@ -105,6 +105,7 @@ class Beam:
         self.req_bot_middle_flex_reinf = 0
         self.req_bot_right_flex_reinf = 0
         self.transverse_space_check = None
+        self.final_shear_legs = 0
 
     def __str__(self):
         """Create a string describing the attributes of each instantiated beam.
@@ -577,23 +578,32 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             self.req_total_right_shear_reinf = "O/S in Shear and Torsion"
 
     def get_shear_legs(self):
-        """This method calculates the required shear legs based on the width of the instanced beams.
-        It is currently crude and needs updating to be in line with ACI 318-19.
+        """This method calculates the required shear legs based on the maximum transverse shear spacing as required
+        in Table 9.7.6.2.2. of ACI 318-19.
         """
-        if self.width < 400:
+        max_transverse_spacing = min(self.eff_depth, 600)
+        req_legs = (max_transverse_spacing - 80) / self.width
+        if req_legs < 2:
             self.req_shear_legs = 2
-        elif self.width >= 400 and self.width < 800:
-            self.req_shear_legs = 4
-        elif self.width >= 800:
-            self.req_shear_legs = 6
+        else:
+            self.req_shear_legs = np.ceil(req_legs)
 
     def get_shear_string(self):
         """This method calculates the required shear reinforcement string.
         It defines two lists: one diameter list, ranging from 12 to 25mm dia, and another spacing
         list from 250 to 100mm. It utilises a truthy statement to ensure that the right
         diameter and spacing combination is found for the shear reinforcement."""
-        shear_dia_list = [12, 16, 20, 25]
-        shear_spacing_list = [250, 200, 150, 100]
+        shear_dia_list = [12, 16]
+        shear_spacing_list = [250, 200, 150, 100, self.min_shear_long_spacing]
+        shear_spacing_list = list(
+            set(
+                spacing
+                for spacing in shear_spacing_list
+                if spacing <= self.min_shear_long_spacing
+            )
+        )
+        shear_spacing_list.sort(reverse=True)
+        shear_legs_list = list(range(self.req_shear_legs, self.flex_rebar_count + 1))
         target = [
             self.req_total_left_shear_reinf,
             self.req_total_middle_shear_reinf,
@@ -606,20 +616,25 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                     if found:
                         break
                     for spacing in shear_spacing_list:
-                        if (1000 / spacing) * (
-                            Beam.provided_reinforcement(dia)
-                        ) * self.req_shear_legs > req and (  # type: ignore
-                            1000 / spacing
-                        ) * (Beam.provided_reinforcement(dia)) * 2 > tor_req:  # type: ignore
-                            target[index] = f"{self.req_shear_legs}L-T{dia}@{spacing}"
-                            found = True
-                            if index == 0:
-                                self.shear_left_dia = dia
-                            elif index == 1:
-                                self.shear_middle_dia = dia
-                            elif index == 2:
-                                self.shear_right_dia = dia
+                        if found:
                             break
+                        for legs in shear_legs_list:
+                            if found:
+                                break
+                            if (1000 / spacing) * (
+                                Beam.provided_reinforcement(dia)
+                            ) * legs > req and (  # type: ignore
+                                1000 / spacing
+                            ) * (Beam.provided_reinforcement(dia)) * 2 > tor_req:  # type: ignore
+                                target[index] = f"{legs}L-T{dia}@{spacing}"
+                                found = True
+                                if index == 0:
+                                    self.shear_left_dia = dia
+                                elif index == 1:
+                                    self.shear_middle_dia = dia
+                                elif index == 2:
+                                    self.shear_right_dia = dia
+                                break
         else:
             target = ["Overstressed. Please re-assess"] * len(target)
         self.shear_left_string = target[0]
@@ -631,8 +646,17 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         It defines two lists: one diameter list, ranging from 12 to 25mm dia, and another spacing
         list from 250 to 100mm. It utilises a truthy statement to ensure that the right
         diameter and spacing combination is found for the shear reinforcement."""
-        shear_dia_list = [12, 16, 20, 25]
-        shear_spacing_list = [250, 200, 150, 100]
+        shear_dia_list = [12, 16]
+        shear_spacing_list = [250, 200, 150, 100, self.min_shear_long_spacing]
+        shear_spacing_list = list(
+            set(
+                spacing
+                for spacing in shear_spacing_list
+                if spacing <= self.min_shear_long_spacing
+            )
+        )
+        shear_spacing_list.sort(reverse=True)
+        shear_legs_list = list(range(self.req_shear_legs, self.flex_rebar_count + 1))
         target = [
             self.req_total_left_shear_reinf,
             self.req_total_middle_shear_reinf,
@@ -645,18 +669,23 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                     if found:
                         break
                     for spacing in shear_spacing_list:
-                        if (1000 / spacing) * Beam.provided_reinforcement(
-                            dia
-                        ) * self.req_shear_legs > req and (
-                            1000 / spacing
-                        ) * Beam.provided_reinforcement(dia) * 2 > tor_req:  # type: ignore
-                            target[index] = (
-                                (1000 / spacing)
-                                * Beam.provided_reinforcement(dia)
-                                * self.req_shear_legs
-                            )
-                            found = True
+                        if found:
                             break
+                        for legs in shear_legs_list:
+                            if found:
+                                break
+                            if (1000 / spacing) * Beam.provided_reinforcement(
+                                dia
+                            ) * legs > req and (
+                                1000 / spacing
+                            ) * Beam.provided_reinforcement(dia) * 2 > tor_req:  # type: ignore
+                                target[index] = (
+                                    (1000 / spacing)
+                                    * Beam.provided_reinforcement(dia)
+                                    * legs
+                                )
+                                found = True
+                                break
         else:
             target = ["Overstressed. Please re-assess"] * len(target)
         self.shear_left_area = target[0]
@@ -919,11 +948,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             self.flex_bot_right_dia,
             self.flex_bot_right_dia_two,
         ]
-        combined_shear_dia_list = [
-            self.shear_left_dia,
-            self.shear_middle_dia,
-            self.shear_right_dia,
-        ]
+        combined_shear_dia_list = [16]
 
         if (
             self.pos_flex_combo == "False"
@@ -987,91 +1012,108 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
     def modify_shear_reinf(self):
         """This method assesses whether the longitudinal shear spacing provided is greater than the codal maximum.
         If it is, than the spacing provided is replaced by the codal maximum both in string and area.
-        Note that only the left and right is considered as ACI 318-19 18.4.2.4 considers only both ends of beam,
-        not whole beam.
+        Note that this is modifying only the middle portion, as the left and right is accounted for in the other methods.
         """
-        shear_dia_list = [12, 16, 20, 25]
-        target = [
-            self.req_total_left_shear_reinf,
-            self.req_total_right_shear_reinf,
-        ]
+        shear_dia_list = [12, 16]
+
+        paired_values = []
+
+        shear_spacing_list = [250, 200, 150, 100, self.min_shear_centre_long_spacing]
         check_shear = [
             self.shear_left_string,
             self.shear_middle_string,
             self.shear_right_string,
         ]
-        paired_values = []
+        shear_spacing_list = list(
+            set(
+                spacing
+                for spacing in shear_spacing_list
+                if spacing <= self.min_shear_centre_long_spacing
+            )
+        )
+        shear_spacing_list.sort(reverse=True)
+
+        left_legs = self.shear_left_string[0]
+        middle_legs = self.shear_middle_string[0]
+        right_legs = self.shear_right_string[0]
+        left_legs = int(left_legs)
+        middle_legs = int(middle_legs)
+        right_legs = int(right_legs)
+        self.final_shear_legs = max(left_legs, middle_legs, right_legs)
+
+        left_spacing = self.shear_left_string[-3:]
+        right_spacing = self.shear_right_string[-3:]
+        left_spacing = int(left_spacing)
+        right_spacing = int(right_spacing)
+        final_spacing = min([left_spacing, right_spacing])
+
+        target = [self.req_total_left_shear_reinf, self.req_total_right_shear_reinf]
+        tor_target = [self.req_torsion_reinf[0], self.req_torsion_reinf[2]]
 
         if (
             "Overstressed. Please re-assess" not in check_shear
-            and self.min_shear_long_spacing != 0
             and self.min_shear_centre_long_spacing != 0
+            and self.min_shear_long_spacing != 0
         ):
-            shear_left_spacing = int(self.shear_left_string[-3:])  # type: ignore
-            shear_middle_spacing = int(self.shear_middle_string[-3:])  # type: ignore
-            shear_right_spacing = int(self.shear_right_string[-3:])  # type: ignore
-            if (
-                shear_left_spacing > self.min_shear_long_spacing
-                or shear_right_spacing > self.min_shear_long_spacing
-            ):
-                for index, (req, tor_req) in enumerate(
-                    zip(target, self.req_torsion_reinf)
-                ):
-                    found = False
-                    for dia in shear_dia_list:
-                        if found:
-                            break
-                        if (
-                            (1000 / self.min_shear_long_spacing)
-                            * Beam.provided_reinforcement(dia)
-                            * self.req_shear_legs
-                        ) > req and (
-                            (1000 / self.min_shear_long_spacing)
-                            * Beam.provided_reinforcement(dia)
-                            * 2
-                        ) > tor_req:  # type: ignore
-                            paired_values.append(
-                                [
-                                    (1000 / self.min_shear_long_spacing)
-                                    * Beam.provided_reinforcement(dia)
-                                    * self.req_shear_legs,
-                                    f"{self.req_shear_legs}L-T{dia}@{self.min_shear_long_spacing}",
-                                ]
-                            )
-                            if index == 0:
-                                self.shear_left_dia = dia
-                            else:
-                                self.shear_right_dia = dia
-                            found = True
-
-                self.shear_left_area = paired_values[0][0]
-                self.shear_right_area = paired_values[1][0]
-
-                self.shear_left_string = paired_values[0][1]
-                self.shear_right_string = paired_values[1][1]
-
-            if shear_middle_spacing > self.min_shear_centre_long_spacing:
+            for index, (req, tor_req) in enumerate(zip(target, tor_target)):
                 found = False
                 for dia in shear_dia_list:
                     if found:
                         break
                     if (
-                        (1000 / self.min_shear_centre_long_spacing)
+                        (1000 / final_spacing)
                         * Beam.provided_reinforcement(dia)
-                        * self.req_shear_legs
-                    ) > self.req_total_middle_shear_reinf and (
-                        (1000 / self.min_shear_centre_long_spacing)
-                        * Beam.provided_reinforcement(dia)
-                        * 2
-                    ) > self.req_torsion_reinf[1]:  # type: ignore
-                        self.shear_middle_area = (
-                            (1000 / self.min_shear_centre_long_spacing)
-                            * Beam.provided_reinforcement(dia)
-                            * self.req_shear_legs
+                        * self.final_shear_legs
+                    ) > req and (
+                        (1000 / final_spacing) * Beam.provided_reinforcement(dia) * 2
+                    ) > tor_req:  # type: ignore
+                        paired_values.append(
+                            [
+                                (1000 / final_spacing)
+                                * Beam.provided_reinforcement(dia)
+                                * self.final_shear_legs,
+                                f"{self.final_shear_legs}L-T{dia}@{final_spacing}",
+                            ]
                         )
-                        self.shear_middle_string = f"{self.req_shear_legs}L-T{dia}@{self.min_shear_centre_long_spacing}"
-                        self.shear_middle_dia = dia
+                        if index == 0:
+                            self.shear_left_dia = dia
+                        else:
+                            self.shear_right_dia = dia
                         found = True
+
+            self.shear_left_area = paired_values[0][0]
+            self.shear_right_area = paired_values[1][0]
+
+            self.shear_left_string = paired_values[0][1]
+            self.shear_right_string = paired_values[1][1]
+
+            shear_middle_spacing = int(self.shear_middle_string[-3:])  # type: ignore
+            if shear_middle_spacing < self.min_shear_centre_long_spacing:
+                found = False
+                for dia in shear_dia_list:
+                    if found:
+                        break
+                    for spacing in shear_spacing_list:
+                        if found:
+                            break
+                        if (
+                            (1000 / spacing)
+                            * Beam.provided_reinforcement(dia)
+                            * self.final_shear_legs
+                        ) > self.req_total_middle_shear_reinf and (
+                            (1000 / spacing) * Beam.provided_reinforcement(dia) * 2
+                        ) > self.req_torsion_reinf[1]:  # type: ignore
+                            self.shear_middle_area = (
+                                (1000 / spacing)
+                                * Beam.provided_reinforcement(dia)
+                                * self.final_shear_legs
+                            )
+                            self.shear_middle_string = (
+                                f"{self.final_shear_legs}L-T{dia}@{spacing}"
+                            )
+                            self.shear_middle_dia = dia
+                            found = True
+                            break
 
     def check_transverse_shear_spacing(self):
         """This method assesses if the required Vs is greater or less than the nominal concrete shear capacity.

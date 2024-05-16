@@ -356,10 +356,10 @@ def test_min_shear_long_spacing(example_beam: Beam):
     example_beam.get_top_flex_rebar_string()
     example_beam.get_bot_flex_rebar_string()
     example_beam.get_total_shear_req()
+    example_beam.get_min_shear_long_spacing()
     example_beam.get_shear_legs()
     example_beam.get_shear_string()
     example_beam.get_shear_area()
-    example_beam.get_min_shear_long_spacing()
     assert example_beam.min_shear_long_spacing == 200
     assert example_beam.min_shear_centre_long_spacing == 250
 
@@ -378,13 +378,13 @@ def test_modified_shear_reinf(example_beam: Beam):
     example_beam.get_bot_flex_rebar_string()
     example_beam.get_total_shear_req()
     example_beam.get_shear_legs()
+    example_beam.get_min_shear_long_spacing()
     example_beam.get_shear_string()
     example_beam.get_shear_area()
-    example_beam.get_min_shear_long_spacing()
     example_beam.modify_shear_reinf()
-    assert example_beam.shear_left_string == "4L-T12@200"
-    assert example_beam.shear_middle_string == "4L-T12@250"
-    assert example_beam.shear_right_string == "4L-T12@200"
+    assert example_beam.shear_left_string == "2L-T12@200"
+    assert example_beam.shear_middle_string == "2L-T12@250"
+    assert example_beam.shear_right_string == "2L-T12@200"
 
     assert example_beam.shear_left_area == approx(2261.95, 0.001)
     assert example_beam.shear_middle_area == approx(1809.56, 0.001)
