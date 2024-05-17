@@ -16,7 +16,7 @@ def example_beam() -> Beam:
         story="P2",
         id="B683",
         width=400,
-        depth=1150,
+        depth=750,
         comp_conc_grade=45,
         pos_flex_combo="False",
         neg_flex_combo="False",
@@ -210,6 +210,7 @@ def test_get_shear_string(example_beam: Beam):
     """
     example_beam.get_total_shear_req()
     example_beam.get_shear_legs()
+    example_beam.get_min_shear_long_spacing()
     example_beam.get_shear_string()
     assert example_beam.shear_left_string == "4L-T12@250"
     assert example_beam.shear_middle_string == "4L-T12@250"
@@ -360,7 +361,7 @@ def test_min_shear_long_spacing(example_beam: Beam):
     example_beam.get_shear_legs()
     example_beam.get_shear_string()
     example_beam.get_shear_area()
-    assert example_beam.min_shear_long_spacing == 200
+    assert example_beam.min_shear_long_spacing == 150
     assert example_beam.min_shear_centre_long_spacing == 250
 
 

@@ -593,7 +593,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         It defines two lists: one diameter list, ranging from 12 to 25mm dia, and another spacing
         list from 250 to 100mm. It utilises a truthy statement to ensure that the right
         diameter and spacing combination is found for the shear reinforcement."""
-        shear_dia_list = [12, 16]
+        shear_dia_list = [12, 16, 20, 25]
         shear_spacing_list = [250, 200, 150, 100, self.min_shear_long_spacing]
         shear_spacing_list = list(
             set(
@@ -603,7 +603,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             )
         )
         shear_spacing_list.sort(reverse=True)
-        shear_legs_list = list(range(self.req_shear_legs, self.flex_rebar_count + 1))
+        shear_legs_list = list(range(self.req_shear_legs, self.flex_rebar_count + 1, 2))
         target = [
             self.req_total_left_shear_reinf,
             self.req_total_middle_shear_reinf,
@@ -646,7 +646,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         It defines two lists: one diameter list, ranging from 12 to 25mm dia, and another spacing
         list from 250 to 100mm. It utilises a truthy statement to ensure that the right
         diameter and spacing combination is found for the shear reinforcement."""
-        shear_dia_list = [12, 16]
+        shear_dia_list = [12, 16, 20, 25]
         shear_spacing_list = [250, 200, 150, 100, self.min_shear_long_spacing]
         shear_spacing_list = list(
             set(
@@ -656,7 +656,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             )
         )
         shear_spacing_list.sort(reverse=True)
-        shear_legs_list = list(range(self.req_shear_legs, self.flex_rebar_count + 1))
+        shear_legs_list = list(range(self.req_shear_legs, self.flex_rebar_count + 1, 2))
         target = [
             self.req_total_left_shear_reinf,
             self.req_total_middle_shear_reinf,
@@ -948,7 +948,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             self.flex_bot_right_dia,
             self.flex_bot_right_dia_two,
         ]
-        combined_shear_dia_list = [16]
+        combined_shear_dia_list = [20]
 
         if (
             self.pos_flex_combo == "False"
@@ -1010,11 +1010,10 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
                 self.min_shear_centre_long_spacing = 100
 
     def modify_shear_reinf(self):
-        """This method assesses whether the longitudinal shear spacing provided is greater than the codal maximum.
-        If it is, than the spacing provided is replaced by the codal maximum both in string and area.
-        Note that this is modifying only the middle portion, as the left and right is accounted for in the other methods.
+        """This method overrides the middle shear spacing to assess if the codal maximum is met. If it isn't, it sets it to the codal maximum and then iterates through
+        the design. For the left and right shear portions, the legs and spacing are set to be the same and recalculated to assess if a smaller dia is achievable.
         """
-        shear_dia_list = [12, 16]
+        shear_dia_list = [12, 16, 20, 25]
 
         paired_values = []
 
@@ -1033,22 +1032,27 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         )
         shear_spacing_list.sort(reverse=True)
 
-        left_legs = self.shear_left_string[0]
-        middle_legs = self.shear_middle_string[0]
-        right_legs = self.shear_right_string[0]
-        left_legs = int(left_legs)
-        middle_legs = int(middle_legs)
-        right_legs = int(right_legs)
-        self.final_shear_legs = max(left_legs, middle_legs, right_legs)
+        if (
+            "Overstressed. Please re-assess" not in check_shear
+            and self.min_shear_centre_long_spacing != 0
+            and self.min_shear_long_spacing != 0
+        ):
+            left_legs = self.shear_left_string[0]
+            middle_legs = self.shear_middle_string[0]
+            right_legs = self.shear_right_string[0]
+            left_legs = int(left_legs)
+            middle_legs = int(middle_legs)
+            right_legs = int(right_legs)
+            self.final_shear_legs = max(left_legs, middle_legs, right_legs)
 
-        left_spacing = self.shear_left_string[-3:]
-        right_spacing = self.shear_right_string[-3:]
-        left_spacing = int(left_spacing)
-        right_spacing = int(right_spacing)
-        final_spacing = min([left_spacing, right_spacing])
+            left_spacing = self.shear_left_string[-3:]
+            right_spacing = self.shear_right_string[-3:]
+            left_spacing = int(left_spacing)
+            right_spacing = int(right_spacing)
+            final_spacing = min([left_spacing, right_spacing])
 
-        target = [self.req_total_left_shear_reinf, self.req_total_right_shear_reinf]
-        tor_target = [self.req_torsion_reinf[0], self.req_torsion_reinf[2]]
+            target = [self.req_total_left_shear_reinf, self.req_total_right_shear_reinf]
+            tor_target = [self.req_torsion_reinf[0], self.req_torsion_reinf[2]]
 
         if (
             "Overstressed. Please re-assess" not in check_shear
