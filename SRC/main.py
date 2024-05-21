@@ -22,7 +22,7 @@ def main():
 def excel_handler(e: events.UploadEventArguments, container):
     global processed_beam_schedule_df
     xl = pd.ExcelFile(e.content)
-    if len(xl.sheet_names) == 3:
+    if len(xl.sheet_names) == 4:
         ui.notify(
             f"{e.name} successfully uploaded! Please await processing.",
             type="positive",
@@ -41,11 +41,13 @@ async def process_content(e: events.UploadEventArguments, container):
     excel_file = e.content
     checking_flex = pd.read_excel(excel_file, sheet_name=0)
     checking_shear = pd.read_excel(excel_file, sheet_name=1)
+    checking_span = pd.read_excel(excel_file, sheet_name=2)
     if (
         checking_flex.columns[0]
         == "TABLE:  Concrete Beam Flexure Envelope - ACI 318-19"
         and checking_shear.columns[0]
         == "TABLE:  Concrete Beam Shear Envelope - ACI 318-19"
+        and checking_span.columns[0] == "TABLE: Beam Object Connectivity"
     ):
         initial_flexural_df = pd.read_excel(excel_file, sheet_name=0)
         initial_shear_df = pd.read_excel(excel_file, sheet_name=1)
