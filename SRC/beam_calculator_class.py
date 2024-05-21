@@ -208,15 +208,16 @@ class Beam:
         and then distributes it amongst the top and bottom longitudinal reinforcement. It modifies
         the attributes in place and changes the flex_torsion reinforcement to a list of 0's.
         """
-        if self.depth <= 700:
-            divided_torsion_list = [i / 2 for i in self.req_flex_torsion_reinf]
-            self.req_top_flex_reinf = [
-                a + b for a, b in zip(divided_torsion_list, self.req_top_flex_reinf)
-            ]
-            self.req_bot_flex_reinf = [
-                a + b for a, b in zip(divided_torsion_list, self.req_bot_flex_reinf)
-            ]
-            self.req_flex_torsion_reinf = [0, 0, 0]
+        if self.pos_flex_combo == "False" or self.neg_flex_combo == "False":
+            if self.depth <= 700:
+                divided_torsion_list = [i / 2 for i in self.req_flex_torsion_reinf]
+                self.req_top_flex_reinf = [
+                    a + b for a, b in zip(divided_torsion_list, self.req_top_flex_reinf)
+                ]
+                self.req_bot_flex_reinf = [
+                    a + b for a, b in zip(divided_torsion_list, self.req_bot_flex_reinf)
+                ]
+                self.req_flex_torsion_reinf = [0, 0, 0]
 
         (
             self.req_bot_left_flex_reinf,
