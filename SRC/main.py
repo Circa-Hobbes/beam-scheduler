@@ -39,9 +39,9 @@ def excel_handler(e: events.UploadEventArguments, container):
 async def process_content(e: events.UploadEventArguments, container):
     global processed_beam_schedule_df
     excel_file = e.content
-    checking_flex = pd.read_excel(excel_file, sheet_name=0)
-    checking_shear = pd.read_excel(excel_file, sheet_name=1)
-    checking_span = pd.read_excel(excel_file, sheet_name=2)
+    checking_span = pd.read_excel(excel_file, sheet_name=0)
+    checking_flex = pd.read_excel(excel_file, sheet_name=1)
+    checking_shear = pd.read_excel(excel_file, sheet_name=2)
     if (
         checking_flex.columns[0]
         == "TABLE:  Concrete Beam Flexure Envelope - ACI 318-19"
@@ -49,8 +49,9 @@ async def process_content(e: events.UploadEventArguments, container):
         == "TABLE:  Concrete Beam Shear Envelope - ACI 318-19"
         and checking_span.columns[0] == "TABLE: Beam Object Connectivity"
     ):
-        initial_flexural_df = pd.read_excel(excel_file, sheet_name=0)
-        initial_shear_df = pd.read_excel(excel_file, sheet_name=1)
+        initial_flexural_df = pd.read_excel(excel_file, sheet_name=1)
+        initial_shear_df = pd.read_excel(excel_file, sheet_name=2)
+        initial_span_df = pd.read_excel(excel_file, sheet_name=0)
         processed_beam_schedule_df = await asyncio.to_thread(
             pr.process_dataframes, initial_flexural_df, initial_shear_df
         )
