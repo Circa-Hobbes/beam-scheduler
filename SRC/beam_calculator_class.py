@@ -107,69 +107,6 @@ class Beam:
         self.transverse_space_check = None
         self.final_shear_legs = 0
 
-    def __str__(self):
-        """Create a string describing the attributes of each instantiated beam.
-
-        Returns:
-            _type_: A string of the attributes of a beam.
-        """
-        return f"""Story: {self.story}
-ETABS Beam ID: {self.id}
-
-Width: {self.width} mm 
-Depth: {self.depth} mm
-
-Positive Flexural Combo: {self.pos_flex_combo}
-Negative Flexural Combo: {self.neg_flex_combo}
-
-Required Top Flexural Reinforcement: {self.req_top_flex_reinf} mm^2
-Required Bottom Flexural Reinforcement: {self.req_bot_flex_reinf} mm^2
-Required Flexural Torsion Reinforcement: {self.req_flex_torsion_reinf} mm^2
-
-Shear Combo: {self.shear_combo}
-Torsion Combo: {self.torsion_combo}
-
-Required Shear Reinforcement: {self.req_shear_reinf} mm^2/m
-Required Torsion Reinforcement: {self.req_torsion_reinf} mm^2/m
-
-Calculated Longitudinal Rebar Count: {self.flex_rebar_count}
-
-Provided Longitudinal Top Left Reinforcement: {self.flex_top_left_rebar_string} / {self.flex_top_left_rebar_area} mm^2
-Provided Longitudinal Top Middle Reinforcement: {self.flex_top_middle_rebar_string} / {self.flex_top_middle_rebar_area} mm^2
-Provided Longitudinal Top Right Reinforcement: {self.flex_top_right_rebar_string} / {self.flex_top_right_rebar_area} mm^2
-
-Provided Longitudinal Bottom Left Reinforcement: {self.flex_bot_left_rebar_string} / {self.flex_bot_left_rebar_area} mm^2
-Provided Longitudinal Bottom Middle Reinforcement: {self.flex_bot_middle_rebar_string} / {self.flex_bot_middle_rebar_area} mm^2
-Provided Longitudinal Bottom Right Reinforcement: {self.flex_bot_right_rebar_string} / {self.flex_bot_right_rebar_area} mm^2
-
-Left Residual Rebar: {self.left_residual_rebar} mm^2
-Middle Residual Rebar: {self.middle_residual_rebar} mm^2
-Right Residual Rebar: {self.right_residual_rebar} mm^2
-
-Required Shear Legs: {self.req_shear_legs}
-Minimum Shear Longitudinal Spacing: {self.min_shear_long_spacing} mm
-Minimum Shear Centre Longitudinal Spacing: {self.min_shear_centre_long_spacing} mm
-
-Required Total Left Shear Reinforcement: {self.req_total_left_shear_reinf}
-Required Total Middle Shear Reinforcement: {self.req_total_middle_shear_reinf}
-Required Total Right Shear Reinforcement: {self.req_total_right_shear_reinf}
-
-Provided Left Shear Reinforcement: {self.shear_left_string} / {self.shear_left_area} mm^2
-Provided Middle Shear Reinforcement: {self.shear_middle_string} / {self.shear_middle_area} mm^2
-Provided Right Shear Reinforcement: {self.shear_right_string} / {self.shear_right_area} mm^2
-
-Selected Left Shear Reinforcement: {self.selected_shear_left_string} / {self.selected_shear_left_area} mm^2
-Selected Middle Shear Reinforcement: {self.selected_shear_middle_string} / {self.selected_shear_middle_area} mm^2
-Selected Right Shear Reinforcement: {self.selected_shear_right_string} / {self.selected_shear_right_area} mm^2
-
-Calculated Side Face Clear Space: {self.side_face_clear_space} mm
-
-Provided Left Side Face Reinforcement: {self.side_face_left_string} / {self.side_face_left_area} mm^2
-Provided Middle Side Face Reinforcement: {self.side_face_middle_string} / {self.side_face_middle_area} mm^2
-Provided Right Side Face Reinforcement: {self.side_face_right_string} / {self.side_face_right_area} mm^2
-
-Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_string} / {self.selected_side_face_reinforcement_area} mm^2"""
-
     @staticmethod
     def get_width(width: str) -> int:
         """This function cleans and retrieves the relevant width of the beam.
@@ -270,7 +207,6 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         If it's <=700mm, it takes the torsion flexural requirement list, splits each index into two,
         and then distributes it amongst the top and bottom longitudinal reinforcement. It modifies
         the attributes in place and changes the flex_torsion reinforcement to a list of 0's.
-        Check if we need to check against the flexural torsion combo
         """
         if self.depth <= 700:
             divided_torsion_list = [i / 2 for i in self.req_flex_torsion_reinf]
@@ -594,7 +530,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         list from 250 to 100mm. It utilises a truthy statement to ensure that the right
         diameter and spacing combination is found for the shear reinforcement."""
         shear_dia_list = [12, 16, 20, 25]
-        shear_spacing_list = [250, 200, 150, 100, self.min_shear_long_spacing]
+        shear_spacing_list = [250, 200, 150, 125, 100, self.min_shear_long_spacing]
         shear_spacing_list = list(
             set(
                 spacing
@@ -647,7 +583,7 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
         list from 250 to 100mm. It utilises a truthy statement to ensure that the right
         diameter and spacing combination is found for the shear reinforcement."""
         shear_dia_list = [12, 16, 20, 25]
-        shear_spacing_list = [250, 200, 150, 100, self.min_shear_long_spacing]
+        shear_spacing_list = [250, 200, 150, 125, 100, self.min_shear_long_spacing]
         shear_spacing_list = list(
             set(
                 spacing
@@ -1017,7 +953,14 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
 
         paired_values = []
 
-        shear_spacing_list = [250, 200, 150, 100, self.min_shear_centre_long_spacing]
+        shear_spacing_list = [
+            250,
+            200,
+            150,
+            125,
+            100,
+            self.min_shear_centre_long_spacing,
+        ]
         check_shear = [
             self.shear_left_string,
             self.shear_middle_string,
@@ -1143,3 +1086,67 @@ Selected Side Face Reinforcement is: {self.selected_side_face_reinforcement_stri
             self.transverse_space_check = "No"
         else:
             self.transverse_space_check = "Yes"
+
+    # def process_bot_flexural_rebar_string(self):
+    #     dia_list = [16, 20, 25, 32]
+    #     target = self.req_top_flex_reinf.copy()
+    #     current_bot_string = [
+    #         self.flex_bot_left_rebar_string,
+    #         self.flex_bot_middle_rebar_string,
+    #         self.flex_bot_right_rebar_string,
+    #     ]
+    #     if self.neg_flex_combo == "False" and self.pos_flex_combo == "False":
+    #         bot_first_layer_dia = {
+    #             self.flex_bot_left_dia,
+    #             self.flex_bot_middle_dia,
+    #             self.flex_bot_right_dia,
+    #         }
+    #         bot_first_layer_dia_loop = list(bot_first_layer_dia)
+    #         if len(bot_first_layer_dia) == 2:
+    #             for index, req in enumerate(target):
+    #                 found = False
+    #                 if index == bot_first_layer_dia_loop.index(
+    #                     min(bot_first_layer_dia_loop)
+    #                 ):
+    #                     target[index] = current_bot_string[index]
+    #                     found = True
+    #                     break
+    #                 else:
+    #                     for dia in dia_list:
+    #                         if (
+    #                             Beam.provided_reinforcement(
+    #                                 min(bot_first_layer_dia_loop)
+    #                             )
+    #                             * self.flex_rebar_count
+    #                         ) + (
+    #                             Beam.provided_reinforcement(dia) * self.flex_rebar_count
+    #                         ) > req:  # type: ignore
+    #                             target[index] = (
+    #                                 f"{self.flex_rebar_count}T{min(bot_first_layer_dia_loop)} + {self.flex_rebar_count}T{dia}"
+    #                             )
+    #                             found = True
+    #                             if index == 0:
+    #                                 self.flex_bot_left_dia = min(
+    #                                     bot_first_layer_dia_loop
+    #                                 )
+    #                                 self.flex_bot_left_dia_two = dia
+    #                                 self.flex_bot_left_rebar_string = target[index]
+    #                             elif index == 1:
+    #                                 self.flex_bot_middle_dia = min(
+    #                                     bot_first_layer_dia_loop
+    #                                 )
+    #                                 self.flex_bot_middle_dia_two = dia
+    #                                 self.flex_bot_middle_rebar_string = target[index]
+    #                             elif index == 2:
+    #                                 self.flex_bot_right_dia = min(
+    #                                     bot_first_layer_dia_loop
+    #                                 )
+    #                                 self.flex_bot_right_dia_two = dia
+    #                                 self.flex_bot_right_rebar_string = target[index]
+    #                             break
+    #                         if found:
+    #                             break
+    #             if not found:
+    #                 target[index] = "Increase rebar count or re-assess"
+    #     else:
+    #         target = ["Overstressed. Please re-assess"] * len(target)

@@ -282,6 +282,8 @@ def process_dataframes(flexural_df, shear_df):
             beam.get_bot_flex_rebar_string()
             beam.get_bot_flex_rebar_area()
 
+            # beam.process_bot_flexural_rebar_string()
+
             # Calculate the residual rebar obtained from the provided against the required.
             beam.get_residual_rebar()
 
