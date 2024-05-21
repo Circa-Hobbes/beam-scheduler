@@ -47,13 +47,16 @@ async def process_content(e: events.UploadEventArguments, container):
         == "TABLE:  Concrete Beam Flexure Envelope - ACI 318-19"
         and checking_shear.columns[0]
         == "TABLE:  Concrete Beam Shear Envelope - ACI 318-19"
-        and checking_span.columns[0] == "TABLE: Beam Object Connectivity"
+        and checking_span.columns[0] == "TABLE:  Beam Object Connectivity"
     ):
         initial_flexural_df = pd.read_excel(excel_file, sheet_name=1)
         initial_shear_df = pd.read_excel(excel_file, sheet_name=2)
         initial_span_df = pd.read_excel(excel_file, sheet_name=0)
         processed_beam_schedule_df = await asyncio.to_thread(
-            pr.process_dataframes, initial_flexural_df, initial_shear_df
+            pr.process_dataframes,
+            initial_flexural_df,
+            initial_shear_df,
+            initial_span_df,
         )
         with container:
             if isinstance(processed_beam_schedule_df, str):
@@ -82,7 +85,7 @@ async def process_content(e: events.UploadEventArguments, container):
     else:
         with container:
             ui.notify(
-                f"{e.name} does not contain the correct sheets. Are you sure flexure and shear are in the this spreadsheet?",
+                f"{e.name} does not contain the correct sheets. Are you sure flexure, shear, and beam object connectivity are in the this spreadsheet?",
                 type="warning",
             )
 

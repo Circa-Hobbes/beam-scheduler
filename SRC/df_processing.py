@@ -8,6 +8,7 @@ def create_instance(
     id,
     width,
     depth,
+    span,
     comp_conc_grade,
     pos_flex_combo,
     neg_flex_combo,
@@ -25,6 +26,7 @@ def create_instance(
         id,
         width,
         depth,
+        span,
         comp_conc_grade,
         pos_flex_combo,
         neg_flex_combo,
@@ -40,14 +42,16 @@ def create_instance(
     return beam
 
 
-def process_dataframes(flexural_df, shear_df):
+def process_dataframes(flexural_df, shear_df, span_df):
     # Remove the first two rows of both dataframes.
     initial_flexural_df = flexural_df.drop([0, 1])
     initial_shear_df = shear_df.drop([0, 1])
+    initial_span_df = span_df.drop([0, 1])
 
     # Reset indices in place for easier manipulation.
     initial_flexural_df = initial_flexural_df.reset_index(drop=True)
     initial_shear_df = initial_shear_df.reset_index(drop=True)
+    initial_span_df = initial_span_df.reset_index(drop=True)
 
     # Slice through the flexural df and get the story identifier.
     stories = initial_flexural_df[
@@ -70,6 +74,8 @@ def process_dataframes(flexural_df, shear_df):
         dimension_error_check = True
 
     if dimension_error_check is False:
+        # Take each beam's span and convert it from m to mm.
+        spans = initial_span_df["Unnamed: 5"] * 1000
         # Take each beam's positive flexural combo and put it in a list within a list.
         positive_combo_list = initial_flexural_df["Unnamed: 8"].tolist()
         nested_pos_combo_list = [
@@ -233,6 +239,7 @@ def process_dataframes(flexural_df, shear_df):
                 e_id,
                 width,
                 depth,
+                span,
                 concrete_grade,
                 pos_flex_combo,
                 neg_flex_combo,
@@ -245,11 +252,12 @@ def process_dataframes(flexural_df, shear_df):
                 req_shear_reinf,
                 req_torsion_reinf,
             )
-            for stories, e_id, width, depth, concrete_grade, pos_flex_combo, neg_flex_combo, req_top_flex_reinf, req_bot_flex_reinf, req_flex_torsion_reinf, shear_force, shear_combo, torsion_combo, req_shear_reinf, req_torsion_reinf in zip(
+            for stories, e_id, width, depth, span, concrete_grade, pos_flex_combo, neg_flex_combo, req_top_flex_reinf, req_bot_flex_reinf, req_flex_torsion_reinf, shear_force, shear_combo, torsion_combo, req_shear_reinf, req_torsion_reinf in zip(
                 stories,
                 e_ids,
                 beam_widths,
                 beam_depths,
+                spans,
                 concrete_grade,
                 positive_flex_combo,
                 negative_flex_combo,
@@ -319,6 +327,7 @@ def process_dataframes(flexural_df, shear_df):
             [
                 ("Storey", ""),
                 ("Etabs ID", ""),
+                ("Span (mm)", ""),
                 ("Dimensions", "Width (mm)"),
                 ("Dimensions", "Depth (mm)"),
                 ("Bottom Reinforcement", "Left (BL)"),
@@ -396,6 +405,7 @@ def process_dataframes(flexural_df, shear_df):
             "id": ("Etabs ID", ""),
             "width": ("Dimensions", "Width (mm)"),
             "depth": ("Dimensions", "Depth (mm)"),
+            "span": ("Span (mm)", ""),
             "flex_bot_left_rebar_string": ("Bottom Reinforcement", "Left (BL)"),
             "flex_bot_middle_rebar_string": ("Bottom Reinforcement", "Middle (B)"),
             "flex_bot_right_rebar_string": ("Bottom Reinforcement", "Right (BR)"),
